@@ -1,0 +1,675 @@
+<title>斎喜自動車工業所 レンタカー予約 — 画面デザイン</title>
+<style>
+  :root {
+    --paper: #EFF6F5;
+    --surface: #FFFFFF;
+    --surface-alt: #E4EFEE;
+    --ink: #10282C;
+    --ink-soft: #4B6B6E;
+    --line: rgba(14,46,51,0.14);
+    --reef: #17A6A0;
+    --reef-soft: #DCF3F1;
+    --coral: #E0522F;
+    --coral-soft: #FBE2D9;
+    --available: #2E9B5C;
+    --available-soft: #DEF0E4;
+    --pending: #C68A1F;
+    --pending-soft: #F6E7C9;
+    --unavailable: #B23A3A;
+    --unavailable-soft: #F3DCDC;
+    --shadow: 0 20px 44px -24px rgba(9,32,36,.45);
+    --font-display: 'Century Gothic','Futura','Avenir Next',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --font-body: 'Hiragino Sans','Yu Gothic Medium','Yu Gothic','Noto Sans JP',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #081A1D;
+      --surface: #0F2C30;
+      --surface-alt: #123539;
+      --ink: #DCEEEC;
+      --ink-soft: #8FB3B2;
+      --line: rgba(220,238,236,0.14);
+      --reef: #3FC2BB;
+      --reef-soft: #123B3B;
+      --coral: #FF8862;
+      --coral-soft: #3A2420;
+      --available: #59C889;
+      --available-soft: #123B2A;
+      --pending: #E3B255;
+      --pending-soft: #3B2E13;
+      --unavailable: #E37676;
+      --unavailable-soft: #3B1E1E;
+      --shadow: 0 24px 48px -20px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #081A1D; --surface: #0F2C30; --surface-alt: #123539;
+    --ink: #DCEEEC; --ink-soft: #8FB3B2; --line: rgba(220,238,236,0.14);
+    --reef: #3FC2BB; --reef-soft: #123B3B; --coral: #FF8862; --coral-soft: #3A2420;
+    --available: #59C889; --available-soft: #123B2A;
+    --pending: #E3B255; --pending-soft: #3B2E13;
+    --unavailable: #E37676; --unavailable-soft: #3B1E1E;
+    --shadow: 0 24px 48px -20px rgba(0,0,0,.6);
+  }
+  :root[data-theme="light"] {
+    --paper: #EFF6F5; --surface: #FFFFFF; --surface-alt: #E4EFEE;
+    --ink: #10282C; --ink-soft: #4B6B6E; --line: rgba(14,46,51,0.14);
+    --reef: #17A6A0; --reef-soft: #DCF3F1; --coral: #E0522F; --coral-soft: #FBE2D9;
+    --available: #2E9B5C; --available-soft: #DEF0E4;
+    --pending: #C68A1F; --pending-soft: #F6E7C9;
+    --unavailable: #B23A3A; --unavailable-soft: #F3DCDC;
+    --shadow: 0 20px 44px -24px rgba(9,32,36,.45);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 { text-wrap: balance; margin: 0; }
+  button { font-family: inherit; cursor: pointer; }
+  input, select { font-family: inherit; }
+
+  .stage { max-width: 1240px; margin: 0 auto; padding: 48px 28px 80px; }
+
+  .stage-head { margin-bottom: 36px; }
+  .brandmark {
+    font-family: var(--font-display);
+    font-size: .74rem;
+    letter-spacing: .22em;
+    font-weight: 700;
+    color: var(--reef);
+    text-transform: uppercase;
+  }
+  .stage-head h1 {
+    font-size: clamp(1.5rem, 1rem + 1.6vw, 2.15rem);
+    font-weight: 700;
+    margin-top: 10px;
+    letter-spacing: -.01em;
+  }
+  .lede {
+    color: var(--ink-soft);
+    font-size: .95rem;
+    line-height: 1.7;
+    max-width: 62ch;
+    margin: 12px 0 0;
+  }
+
+  .tabs {
+    display: inline-flex;
+    gap: 4px;
+    margin-top: 28px;
+    padding: 4px;
+    background: var(--surface-alt);
+    border-radius: 999px;
+    border: 1px solid var(--line);
+  }
+  .tab {
+    border: none;
+    background: transparent;
+    color: var(--ink-soft);
+    font-size: .86rem;
+    font-weight: 600;
+    padding: 9px 20px;
+    border-radius: 999px;
+    transition: background .15s ease, color .15s ease;
+  }
+  .tab.active { background: var(--reef); color: #06211F; }
+  :root[data-theme="dark"] .tab.active,
+  @media (prefers-color-scheme: dark) { .tab.active { color: #06211F; } }
+
+  .group-label {
+    font-family: var(--font-display);
+    font-size: .72rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 40px 0 18px;
+  }
+
+  .screens-row {
+    display: flex;
+    gap: 26px;
+    overflow-x: auto;
+    padding-bottom: 18px;
+    scroll-snap-type: x proximity;
+  }
+  .screens-row[hidden] { display: none; }
+  .frame-col { scroll-snap-align: start; flex: 0 0 auto; }
+  .frame-caption {
+    max-width: 300px;
+    margin-top: 14px;
+  }
+  .frame-caption .no { font-family: var(--font-display); font-size: .72rem; letter-spacing: .12em; color: var(--reef); font-weight: 700; }
+  .frame-caption h3 { font-size: .98rem; margin-top: 4px; }
+  .frame-caption p { font-size: .82rem; color: var(--ink-soft); line-height: 1.6; margin: 4px 0 0; }
+
+  /* ---- phone frame ---- */
+  .phone-frame {
+    width: 302px;
+    border-radius: 30px;
+    background: var(--surface);
+    box-shadow: var(--shadow), 0 0 0 1px var(--line);
+    overflow: hidden;
+  }
+  .phone-status {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 20px 4px;
+    font-size: .72rem;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  .phone-status .dots { display:flex; gap:3px; }
+  .phone-status .dots span { width:4px; height:4px; border-radius:50%; background: var(--ink-soft); display:block; }
+  .phone-body { padding: 10px 18px 26px; min-height: 566px; display: flex; flex-direction: column; gap: 16px; }
+
+  /* ---- desktop frame ---- */
+  .desktop-frame {
+    width: 760px;
+    border-radius: 16px;
+    background: var(--surface);
+    box-shadow: var(--shadow), 0 0 0 1px var(--line);
+    overflow: hidden;
+  }
+  .desktop-titlebar {
+    display: flex; align-items: center; gap: 7px;
+    height: 34px; padding: 0 14px;
+    background: var(--surface-alt);
+    border-bottom: 1px solid var(--line);
+  }
+  .desktop-titlebar .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+  .desktop-titlebar .path {
+    margin-left: 10px; font-size: .72rem; color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  .desktop-body { padding: 26px 30px 30px; min-height: 566px; display: flex; flex-direction: column; gap: 20px; }
+
+  /* ---- shared UI atoms ---- */
+  .app-top {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .app-top .mark { font-family: var(--font-display); font-size: .66rem; letter-spacing: .12em; font-weight: 700; color: var(--reef); text-transform: uppercase; }
+  .field-label {
+    font-size: .74rem; font-weight: 600; color: var(--ink-soft);
+    margin-bottom: 6px; display: block;
+  }
+  .field {
+    width: 100%;
+    padding: 11px 13px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--surface-alt);
+    color: var(--ink);
+    font-size: .88rem;
+  }
+  .field-row { display: flex; gap: 10px; }
+  .field-row > div { flex: 1; }
+
+  .btn {
+    border-radius: 11px;
+    padding: 13px 18px;
+    font-size: .9rem;
+    font-weight: 700;
+    border: none;
+    text-align: center;
+  }
+  .btn-primary { background: var(--coral); color: #FFF6F2; }
+  .btn-staff { background: var(--reef); color: #06211F; }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink);
+  }
+  .btn-block { width: 100%; }
+  .btn-sm { padding: 8px 14px; font-size: .8rem; border-radius: 8px; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 999px;
+    font-size: .72rem; font-weight: 700;
+  }
+  .pill-available { background: var(--available-soft); color: var(--available); }
+  .pill-pending { background: var(--pending-soft); color: var(--pending); }
+  .pill-unavailable { background: var(--unavailable-soft); color: var(--unavailable); }
+  .pill::before { content:""; width:6px; height:6px; border-radius:50%; background: currentColor; }
+
+  .car-icon { display:block; }
+
+  .veh-card {
+    display: flex; gap: 12px; align-items: center;
+    padding: 12px; border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--surface-alt);
+  }
+  .veh-card .icon-wrap {
+    width: 52px; height: 52px; border-radius: 10px;
+    background: var(--reef-soft); color: var(--reef);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .veh-main { flex: 1; min-width: 0; }
+  .veh-main .name { font-size: .88rem; font-weight: 700; }
+  .veh-main .spec { font-size: .74rem; color: var(--ink-soft); margin-top: 2px; }
+  .veh-price { text-align: right; }
+  .veh-price .amount { font-size: 1.02rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .veh-price .unit { font-size: .68rem; color: var(--ink-soft); }
+
+  .summary-strip {
+    display: flex; gap: 12px; align-items: center;
+    padding: 12px; border-radius: 12px;
+    background: var(--reef-soft);
+  }
+  .summary-strip .icon-wrap { background: var(--surface); color: var(--reef); }
+  .summary-strip .meta { font-size: .74rem; color: var(--ink-soft); line-height: 1.5; }
+
+  .divider { height: 1px; background: var(--line); border: none; margin: 2px 0; }
+
+  .checkline { display: flex; align-items: flex-start; gap: 9px; font-size: .78rem; color: var(--ink-soft); }
+  .checkline input { margin-top: 3px; }
+
+  .complete-badge {
+    width: 58px; height: 58px; border-radius: 50%;
+    background: var(--reef-soft); color: var(--reef);
+    display: flex; align-items: center; justify-content: center;
+    margin: 8px auto 0;
+  }
+  .complete-heading { text-align: center; }
+  .complete-heading h2 { font-size: 1.05rem; }
+  .code-block {
+    text-align: center; padding: 16px; border-radius: 12px;
+    background: var(--surface-alt); border: 1px dashed var(--line);
+  }
+  .code-block .label { font-size: .68rem; color: var(--ink-soft); letter-spacing: .1em; }
+  .code-block .code { font-size: 1.2rem; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 4px; }
+  .receipt {
+    border-radius: 12px; border: 1px solid var(--line); padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 8px; font-size: .8rem;
+  }
+  .receipt .row { display: flex; justify-content: space-between; color: var(--ink-soft); }
+  .receipt .row span:last-child { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  /* staff screens */
+  .login-wrap { flex:1; display:flex; align-items:center; justify-content:center; }
+  .login-card {
+    width: 340px; padding: 32px; border-radius: 16px;
+    background: var(--surface-alt); border: 1px solid var(--line);
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .login-card .mark { text-align:center; }
+  .login-card .sub { text-align:center; font-size: .78rem; color: var(--ink-soft); margin-top: 4px; }
+
+  .toolbar { display: flex; align-items: center; justify-content: space-between; }
+  .month-nav { display:flex; align-items:center; gap:12px; font-size:.86rem; font-weight:700; }
+  .month-nav button { background:none; border:none; color: var(--ink-soft); font-size: 1rem; }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: 96px repeat(6, 1fr);
+    gap: 6px;
+    font-size: .72rem;
+  }
+  .cal-grid .hdr { color: var(--ink-soft); text-align:center; padding: 4px 0; font-variant-numeric: tabular-nums; }
+  .cal-grid .veh-name { display:flex; align-items:center; font-weight: 700; font-size: .74rem; }
+  .cal-cell { border-radius: 7px; min-height: 30px; background: var(--surface-alt); }
+  .cal-cell.confirmed { background: var(--reef); color:#06211F; display:flex; align-items:center; justify-content:center; font-weight:700; }
+  .cal-cell.pending { background: var(--pending-soft); border: 1px dashed var(--pending); display:flex; align-items:center; justify-content:center; color:var(--pending); font-weight:700; }
+  .cal-cell.blocked {
+    background: repeating-linear-gradient(135deg, var(--unavailable-soft), var(--unavailable-soft) 4px, var(--surface-alt) 4px, var(--surface-alt) 8px);
+  }
+  .legend { display:flex; gap:16px; font-size: .74rem; color: var(--ink-soft); }
+  .legend .item { display:flex; align-items:center; gap:6px; }
+  .legend .swatch { width:12px; height:12px; border-radius:4px; }
+
+  .detail-card { border-radius: 14px; border: 1px solid var(--line); padding: 22px; display:flex; flex-direction:column; gap:16px; }
+  .detail-head { display:flex; justify-content:space-between; align-items:flex-start; }
+  .detail-head .id { font-family: var(--font-display); font-size:.72rem; letter-spacing:.08em; color: var(--ink-soft); }
+  .kv-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 14px 24px; }
+  .kv-grid .k { font-size:.7rem; color: var(--ink-soft); }
+  .kv-grid .v { font-size:.86rem; font-weight:600; margin-top:2px; }
+  .kv-grid .full { grid-column: 1 / -1; }
+  .detail-actions { display:flex; gap:10px; }
+
+  table.veh-table { width:100%; border-collapse: collapse; font-size:.82rem; }
+  table.veh-table th { text-align:left; font-size:.7rem; color:var(--ink-soft); font-weight:600; padding: 0 12px 10px; }
+  table.veh-table td { padding: 12px; border-top: 1px solid var(--line); }
+  table.veh-table tr td:first-child, table.veh-table tr th:first-child { padding-left: 4px; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .frame-col { animation: rise .5s ease both; }
+    .frame-col:nth-child(2) { animation-delay: .05s; }
+    .frame-col:nth-child(3) { animation-delay: .1s; }
+    .frame-col:nth-child(4) { animation-delay: .15s; }
+  }
+  @keyframes rise { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform:none; } }
+
+  footer.note {
+    margin-top: 52px; padding-top: 20px; border-top: 1px solid var(--line);
+    font-size: .78rem; color: var(--ink-soft); line-height: 1.7;
+  }
+</style>
+
+<div class="stage">
+  <div class="stage-head">
+    <div class="brandmark">Saiki Rent-a-Car · Booking System</div>
+    <h1>斎喜自動車工業所 レンタカー予約システム — 画面デザイン案</h1>
+    <p class="lede">石垣港離島ターミナルと新石垣空港、2拠点でのレンタカー貸出を想定。配色は石垣島の海の色(リーフの青緑)と、電話対応の負荷を減らす明快な操作性を軸にした叩き台。ロゴ・正式なブランドカラーは商談で確定後に調整する。</p>
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-target="customer" type="button">お客様向け</button>
+      <button class="tab" data-target="staff" type="button">スタッフ向け</button>
+    </div>
+  </div>
+
+  <!-- ============ CUSTOMER SCREENS ============ -->
+  <section id="customer" class="screens-row">
+
+    <!-- C1: トップ -->
+    <div class="frame-col">
+      <div class="phone-frame">
+        <div class="phone-status"><span>9:41</span><span class="dots"><span></span><span></span><span></span></span></div>
+        <div class="phone-body">
+          <div class="app-top"><span class="mark">Saiki Rent-a-Car</span></div>
+          <h2 style="font-size:1.05rem;">日程・拠点を選ぶ</h2>
+
+          <div>
+            <span class="field-label">貸出店舗</span>
+            <select class="field">
+              <option>石垣港離島ターミナル店</option>
+              <option>新石垣空港店</option>
+            </select>
+          </div>
+
+          <div class="field-row">
+            <div><span class="field-label">貸出日</span><input class="field" type="date" value="2026-08-12"></div>
+            <div><span class="field-label">時間</span><select class="field"><option>10:00</option></select></div>
+          </div>
+          <div class="field-row">
+            <div><span class="field-label">返却日</span><input class="field" type="date" value="2026-08-14"></div>
+            <div><span class="field-label">時間</span><select class="field"><option>10:00</option></select></div>
+          </div>
+
+          <div>
+            <span class="field-label">返却店舗</span>
+            <select class="field"><option>貸出店舗と同じ</option><option>新石垣空港店</option></select>
+          </div>
+
+          <div style="flex:1;"></div>
+          <button class="btn btn-primary btn-block">空き車両を探す</button>
+        </div>
+      </div>
+      <div class="frame-caption">
+        <div class="no">01 — お客様向け</div>
+        <h3>トップ（日程・拠点選択）</h3>
+        <p>電話での在庫確認をこの画面に置き換える起点。拠点・日時を先に固定してから空き車両を絞り込む。</p>
+      </div>
+    </div>
+
+    <!-- C2: 空き車両一覧 -->
+    <div class="frame-col">
+      <div class="phone-frame">
+        <div class="phone-status"><span>9:41</span><span class="dots"><span></span><span></span><span></span></span></div>
+        <div class="phone-body">
+          <div class="app-top"><span class="mark">Saiki Rent-a-Car</span><button class="btn btn-ghost btn-sm">条件を変更</button></div>
+          <div style="font-size:.76rem; color:var(--ink-soft);">8/12 10:00 〜 8/14 10:00・石垣港離島ターミナル店</div>
+
+          <div class="veh-card">
+            <div class="icon-wrap">
+              <svg class="car-icon" width="30" height="30" viewBox="0 0 48 48" fill="none"><rect x="6" y="22" width="36" height="12" rx="4" fill="currentColor"/><path d="M12 22l4-9h16l4 9" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="15" cy="35" r="4" fill="currentColor"/><circle cx="33" cy="35" r="4" fill="currentColor"/></svg>
+            </div>
+            <div class="veh-main"><div class="name">ホンダ N-BOX</div><div class="spec">軽自動車・4名・AT</div><span class="pill pill-available" style="margin-top:6px;">空きあり</span></div>
+            <div class="veh-price"><div class="amount">¥5,500</div><div class="unit">/ 日</div></div>
+          </div>
+
+          <div class="veh-card">
+            <div class="icon-wrap">
+              <svg class="car-icon" width="30" height="30" viewBox="0 0 48 48" fill="none"><rect x="4" y="22" width="40" height="12" rx="4" fill="currentColor"/><path d="M10 22l4-9h20l4 9" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="14" cy="35" r="4" fill="currentColor"/><circle cx="34" cy="35" r="4" fill="currentColor"/></svg>
+            </div>
+            <div class="veh-main"><div class="name">トヨタ カローラ</div><div class="spec">普通車・5名・AT</div><span class="pill pill-available" style="margin-top:6px;">空きあり</span></div>
+            <div class="veh-price"><div class="amount">¥7,000</div><div class="unit">/ 日</div></div>
+          </div>
+
+          <div class="veh-card" style="opacity:.55;">
+            <div class="icon-wrap" style="background:var(--surface-alt); color:var(--ink-soft);">
+              <svg class="car-icon" width="30" height="30" viewBox="0 0 48 48" fill="none"><rect x="3" y="20" width="42" height="14" rx="4" fill="currentColor"/><path d="M8 20l4-10h24l4 10" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="13" cy="36" r="4" fill="currentColor"/><circle cx="35" cy="36" r="4" fill="currentColor"/></svg>
+            </div>
+            <div class="veh-main"><div class="name">トヨタ ハイエース</div><div class="spec">ミニバン・8名・AT</div><span class="pill pill-unavailable" style="margin-top:6px;">満車</span></div>
+            <div class="veh-price"><div class="amount">¥12,000</div><div class="unit">/ 日</div></div>
+          </div>
+
+          <div style="flex:1;"></div>
+          <button class="btn btn-primary btn-block">N-BOXを選択して次へ</button>
+        </div>
+      </div>
+      <div class="frame-caption">
+        <div class="no">02 — お客様向け</div>
+        <h3>空き車両一覧</h3>
+        <p>クラス別に空き状況を一目で表示。満車の車両は薄く表示し選べないことを明確にする。</p>
+      </div>
+    </div>
+
+    <!-- C3: 予約フォーム -->
+    <div class="frame-col">
+      <div class="phone-frame">
+        <div class="phone-status"><span>9:41</span><span class="dots"><span></span><span></span><span></span></span></div>
+        <div class="phone-body">
+          <div class="app-top"><span class="mark">Saiki Rent-a-Car</span></div>
+          <h2 style="font-size:1.05rem;">予約者情報の入力</h2>
+
+          <div class="summary-strip">
+            <div class="icon-wrap">
+              <svg class="car-icon" width="26" height="26" viewBox="0 0 48 48" fill="none"><rect x="6" y="22" width="36" height="12" rx="4" fill="currentColor"/><path d="M12 22l4-9h16l4 9" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="15" cy="35" r="4" fill="currentColor"/><circle cx="33" cy="35" r="4" fill="currentColor"/></svg>
+            </div>
+            <div><div style="font-size:.86rem; font-weight:700;">ホンダ N-BOX</div><div class="meta">8/12 10:00 〜 8/14 10:00・¥5,500/日</div></div>
+          </div>
+
+          <div><span class="field-label">お名前</span><input class="field" placeholder="石垣 太郎"></div>
+          <div><span class="field-label">電話番号</span><input class="field" placeholder="090-0000-0000"></div>
+          <div><span class="field-label">メールアドレス</span><input class="field" placeholder="taro@example.com"></div>
+
+          <div class="checkline"><input type="checkbox"><span>当日は運転免許証をご持参ください。予約確定後、担当より折り返しご連絡します。</span></div>
+          <div class="checkline"><input type="checkbox" checked><span>予約規定・キャンセルポリシーに同意する</span></div>
+
+          <div style="flex:1;"></div>
+          <button class="btn btn-primary btn-block">仮予約を確定する</button>
+        </div>
+      </div>
+      <div class="frame-caption">
+        <div class="no">03 — お客様向け</div>
+        <h3>予約フォーム</h3>
+        <p>フェーズ1は免許証確認を現地対応にする前提。フェーズ2でアップロード欄をここに追加する設計。</p>
+      </div>
+    </div>
+
+    <!-- C4: 予約完了 -->
+    <div class="frame-col">
+      <div class="phone-frame">
+        <div class="phone-status"><span>9:41</span><span class="dots"><span></span><span></span><span></span></span></div>
+        <div class="phone-body">
+          <div class="app-top"><span class="mark">Saiki Rent-a-Car</span></div>
+
+          <div class="complete-badge">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="complete-heading"><h2>仮予約を受け付けました</h2></div>
+
+          <div class="code-block">
+            <div class="label">予約番号</div>
+            <div class="code">SR-20260812-047</div>
+          </div>
+
+          <div class="receipt">
+            <div class="row"><span>車両</span><span>ホンダ N-BOX</span></div>
+            <div class="row"><span>期間</span><span>8/12 10:00 〜 8/14</span></div>
+            <div class="row"><span>拠点</span><span>離島ターミナル店</span></div>
+            <hr class="divider">
+            <div class="row"><span>お支払い目安</span><span>¥11,000</span></div>
+          </div>
+
+          <div style="font-size:.76rem; color:var(--ink-soft); text-align:center;">内容確認後、担当より1〜2時間以内にご連絡します</div>
+
+          <div style="flex:1;"></div>
+          <button class="btn btn-ghost btn-block">予約内容をメールで確認する</button>
+        </div>
+      </div>
+      <div class="frame-caption">
+        <div class="no">04 — お客様向け</div>
+        <h3>予約完了</h3>
+        <p>予約番号を大きく表示し、後から照会・キャンセルする際の手がかりにする(フェーズ2でマイページ照会に接続)。</p>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============ STAFF SCREENS ============ -->
+  <section id="staff" class="screens-row" hidden>
+
+    <!-- S1: ログイン -->
+    <div class="frame-col">
+      <div class="desktop-frame">
+        <div class="desktop-titlebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="path">staff.saiki-rentacar.jp/login</span></div>
+        <div class="desktop-body">
+          <div class="login-wrap">
+            <div class="login-card">
+              <div class="mark"><span class="brandmark">Saiki Rent-a-Car</span><div class="sub">予約管理システム</div></div>
+              <div><span class="field-label">メールアドレス</span><input class="field" placeholder="staff@saiki-jidousha.jp"></div>
+              <div><span class="field-label">パスワード</span><input class="field" type="password" placeholder="••••••••"></div>
+              <button class="btn btn-staff btn-block">ログイン</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="frame-caption">
+        <div class="no">01 — スタッフ向け</div>
+        <h3>ログイン</h3>
+        <p>Supabase Authでスタッフごとにアカウントを分離。共有パスワード運用にしない。</p>
+      </div>
+    </div>
+
+    <!-- S2: 予約カレンダー -->
+    <div class="frame-col">
+      <div class="desktop-frame">
+        <div class="desktop-titlebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="path">staff.saiki-rentacar.jp/calendar</span></div>
+        <div class="desktop-body">
+          <div class="toolbar">
+            <div class="month-nav"><button>◀</button><span>2026年8月11日〜16日</span><button>▶</button></div>
+            <button class="btn btn-staff btn-sm">＋ 手動予約</button>
+          </div>
+
+          <div class="cal-grid">
+            <div></div>
+            <div class="hdr">11(火)</div><div class="hdr">12(水)</div><div class="hdr">13(木)</div><div class="hdr">14(金)</div><div class="hdr">15(土)</div><div class="hdr">16(日)</div>
+
+            <div class="veh-name">N-BOX</div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell confirmed" style="grid-column: span 2;">石垣 太郎</div>
+            <div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div>
+
+            <div class="veh-name">カローラ</div>
+            <div class="cal-cell pending">仮</div>
+            <div class="cal-cell"></div><div class="cal-cell"></div>
+            <div class="cal-cell confirmed" style="grid-column: span 2;">山田 花子</div>
+            <div class="cal-cell"></div>
+
+            <div class="veh-name">ハイエース</div>
+            <div class="cal-cell blocked"></div><div class="cal-cell blocked"></div>
+            <div class="cal-cell confirmed" style="grid-column: span 3;">団体旅行 8名</div>
+            <div class="cal-cell"></div>
+          </div>
+
+          <div class="legend">
+            <div class="item"><span class="swatch" style="background:var(--reef);"></span>確定</div>
+            <div class="item"><span class="swatch" style="background:var(--pending-soft); border:1px dashed var(--pending);"></span>仮予約</div>
+            <div class="item"><span class="swatch" style="background:repeating-linear-gradient(135deg, var(--unavailable-soft), var(--unavailable-soft) 3px, var(--surface-alt) 3px, var(--surface-alt) 6px);"></span>整備・点検</div>
+            <div class="item"><span class="swatch" style="background:var(--surface-alt); border:1px solid var(--line);"></span>空き</div>
+          </div>
+        </div>
+      </div>
+      <div class="frame-caption">
+        <div class="no">02 — スタッフ向け</div>
+        <h3>予約カレンダー</h3>
+        <p>車両×日付のガントチャート表示。お客様の仮予約はSupabase Realtimeでここに即時反映される。</p>
+      </div>
+    </div>
+
+    <!-- S3: 予約詳細 -->
+    <div class="frame-col">
+      <div class="desktop-frame">
+        <div class="desktop-titlebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="path">staff.saiki-rentacar.jp/reservations/047</span></div>
+        <div class="desktop-body">
+          <div class="detail-card">
+            <div class="detail-head">
+              <div><div class="id">SR-20260812-047</div><h2 style="font-size:1.1rem; margin-top:4px;">石垣 太郎 様</h2></div>
+              <span class="pill pill-pending">仮予約</span>
+            </div>
+            <hr class="divider">
+            <div class="kv-grid">
+              <div><div class="k">車両</div><div class="v">ホンダ N-BOX</div></div>
+              <div><div class="k">拠点</div><div class="v">離島ターミナル店</div></div>
+              <div><div class="k">貸出</div><div class="v">2026/08/12 10:00</div></div>
+              <div><div class="k">返却</div><div class="v">2026/08/14 10:00</div></div>
+              <div><div class="k">電話番号</div><div class="v">090-0000-0000</div></div>
+              <div><div class="k">メール</div><div class="v">taro@example.com</div></div>
+              <div class="full"><div class="k">備考</div><div class="v" style="font-weight:400;">チャイルドシート1台希望</div></div>
+            </div>
+            <div class="detail-actions">
+              <button class="btn btn-staff">予約を確定する</button>
+              <button class="btn btn-ghost">キャンセル</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="frame-caption">
+        <div class="no">03 — スタッフ向け</div>
+        <h3>予約詳細</h3>
+        <p>仮予約(pending)を確認し「確定」操作でconfirmedへ状態遷移。電話再確認なしで完結する。</p>
+      </div>
+    </div>
+
+    <!-- S4: 車両管理 -->
+    <div class="frame-col">
+      <div class="desktop-frame">
+        <div class="desktop-titlebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="path">staff.saiki-rentacar.jp/vehicles</span></div>
+        <div class="desktop-body">
+          <div class="toolbar">
+            <h2 style="font-size:1.05rem;">車両管理</h2>
+            <button class="btn btn-staff btn-sm">＋ 車両を追加</button>
+          </div>
+
+          <table class="veh-table">
+            <thead><tr><th>車両名</th><th>クラス</th><th>定員</th><th>料金/日</th><th>ステータス</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>ホンダ N-BOX</td><td>軽自動車</td><td>4名</td><td>¥5,500</td><td><span class="pill pill-available">稼働中</span></td><td><button class="btn btn-ghost btn-sm">編集</button></td></tr>
+              <tr><td>トヨタ カローラ</td><td>普通車</td><td>5名</td><td>¥7,000</td><td><span class="pill pill-available">稼働中</span></td><td><button class="btn btn-ghost btn-sm">編集</button></td></tr>
+              <tr><td>トヨタ ハイエース</td><td>ミニバン</td><td>8名</td><td>¥12,000</td><td><span class="pill pill-pending">整備中</span></td><td><button class="btn btn-ghost btn-sm">編集</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="frame-caption">
+        <div class="no">04 — スタッフ向け</div>
+        <h3>車両管理</h3>
+        <p>整備・点検ブロック設定で該当期間を自動的に予約不可にする(ダブルブッキング防止と同じDB制約で保護)。</p>
+      </div>
+    </div>
+
+  </section>
+
+  <footer class="note">
+    叩き台のデザイン案。ロゴ・正式なブランドカラー・実写真は商談で確定後に反映する。フォントはClaude Artifact環境の制約によりシステムフォントで構成(参照：<code>infra_artifact_constraints.md</code>)。画面構成は <code>tech_design_car_rental.md</code> のサイトマップに準拠。
+  </footer>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      var target = tab.getAttribute('data-target');
+      document.getElementById('customer').hidden = target !== 'customer';
+      document.getElementById('staff').hidden = target !== 'staff';
+    });
+  });
+</script>
