@@ -182,6 +182,15 @@
   .class-chip .cprice { color:var(--ink-soft); margin-top:2px; font-variant-numeric: tabular-nums; }
   .scroll-hint { text-align:center; font-size:.66rem; color: var(--ink-soft); }
 
+  .mini-footer {
+    margin-top: 8px; padding-top: 14px; border-top: 1px solid var(--line);
+    text-align: center; display: flex; flex-direction: column; gap: 6px;
+  }
+  .mini-footer .mf-name { font-size: .74rem; font-weight: 700; }
+  .mini-footer .mf-tel { font-size: .7rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .mini-footer .mf-links { font-size: .66rem; color: var(--ink-soft); }
+  .mini-footer .mf-links a { color: var(--ink-soft); text-decoration: underline; text-underline-offset: 2px; }
+
   /* ---- desktop frame ---- */
   .desktop-frame {
     width: 760px;
@@ -415,7 +424,16 @@
 
           <div class="scroll-hint">▾ スクロールで続きを見る</div>
 
-          <div class="mini-label">選ばれる理由</div>
+          <div class="mini-label">車種ラインナップ</div>
+          <div class="class-strip">
+            <div class="class-chip"><div class="cname">軽自動車</div><div class="cprice">¥5,500〜</div></div>
+            <div class="class-chip"><div class="cname">コンパクト</div><div class="cprice">¥6,300〜</div></div>
+            <div class="class-chip"><div class="cname">普通車</div><div class="cprice">¥7,000〜</div></div>
+            <div class="class-chip"><div class="cname">SUV</div><div class="cprice">¥9,800〜</div></div>
+            <div class="class-chip"><div class="cname">ミニバン</div><div class="cprice">¥12,000〜</div></div>
+          </div>
+
+          <div class="mini-label">選ばれるポイント</div>
           <div class="perk-grid">
             <div class="perk">
               <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M2 16l4-9h12l4 9M2 16h20M6 16v3M18 16v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
@@ -431,18 +449,17 @@
             </div>
           </div>
 
-          <div class="mini-label">車種ラインナップ</div>
-          <div class="class-strip">
-            <div class="class-chip"><div class="cname">軽自動車</div><div class="cprice">¥5,500〜</div></div>
-            <div class="class-chip"><div class="cname">普通車</div><div class="cprice">¥7,000〜</div></div>
-            <div class="class-chip"><div class="cname">ミニバン</div><div class="cprice">¥12,000〜</div></div>
+          <div class="mini-footer">
+            <div class="mf-name">株式会社斎喜自動車工業所</div>
+            <div class="mf-tel">☎ 0980-XX-XXXX（受付 8:00〜19:00）</div>
+            <div class="mf-links"><a href="#">利用規約</a>・<a href="#">よくあるご質問</a>・<a href="#">会社概要</a></div>
           </div>
         </div>
       </div>
       <div class="frame-caption">
         <div class="no">01 — お客様向け</div>
         <h3>トップ（日程・拠点選択）</h3>
-        <p>電話での在庫確認をこの画面に置き換える起点。拠点・日時を先に固定してから空き車両を絞り込む。フォームの下に強み・車種プレビューを添え、トヨタ・タイムズと同じ「フォーム優先＋下にスクロールで補足情報」という構成に揃えた。</p>
+        <p>電話での在庫確認をこの画面に置き換える起点。拠点・日時を先に固定してから空き車両を絞り込む。フォームの下に車種ラインナップ→選ばれるポイント→フッターの順で補足情報を配置し、トヨタ・タイムズと同じ「フォーム優先＋下にスクロールで補足情報」という構成に揃えた。</p>
       </div>
     </div>
 
