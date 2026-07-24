@@ -202,7 +202,8 @@
   .kv-grid .full { grid-column: 1 / -1; }
   .detail-actions { display:flex; gap:10px; }
 
-  table.veh-table { width:100%; border-collapse: collapse; font-size:.82rem; }
+  .table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table.veh-table { width:100%; min-width: 560px; border-collapse: collapse; font-size:.82rem; }
   table.veh-table th { text-align:left; font-size:.7rem; color:var(--ink-soft); font-weight:600; padding: 0 12px 10px; }
   table.veh-table td { padding: 12px; border-top: 1px solid var(--line); }
   table.veh-table tr td:first-child, table.veh-table tr th:first-child { padding-left: 4px; }
@@ -218,6 +219,22 @@
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(-8px); }
 
   footer.note { margin: 52px auto 0; padding-top: 20px; border-top: 1px solid var(--line); font-size: .78rem; color: var(--ink-soft); line-height: 1.7; max-width: 860px; text-align: center; }
+
+  /* ---- スタッフ(システム)側を狭い画面に合わせる ---- */
+  @media (max-width: 620px) {
+    main { padding: 20px 8px 60px; }
+    .desktop-body { padding: 18px 14px 22px; gap: 16px; min-height: 0; }
+    .desktop-titlebar .path { font-size: .64rem; }
+    .kv-grid { grid-template-columns: 1fr; gap: 10px; }
+    .cal-grid { grid-template-columns: 70px repeat(6, minmax(52px, 1fr)); gap: 4px; font-size: .66rem; overflow-x: auto; }
+    .month-cal-grid { gap: 4px; }
+    .day-cell .dnum { font-size: .72rem; }
+    .day-cell .dcount { font-size: .54rem; }
+    .toolbar { gap: 8px; }
+    .login-card { width: 100%; padding: 24px; }
+    .staffnav { overflow-x: auto; white-space: nowrap; }
+    .phone-frame { width: 100%; max-width: 380px; }
+  }
 </style>
 
 <header class="topbar">
@@ -383,10 +400,12 @@
               <h2 style="font-size:1.05rem;">予約一覧</h2>
               <button class="btn btn-staff btn-sm">＋ 手動予約</button>
             </div>
-            <table class="veh-table">
-              <thead><tr><th>予約番号</th><th>お客様</th><th>車両</th><th>期間</th><th>ステータス</th><th></th></tr></thead>
-              <tbody id="reservation-tbody"></tbody>
-            </table>
+            <div class="table-scroll">
+              <table class="veh-table">
+                <thead><tr><th>予約番号</th><th>お客様</th><th>車両</th><th>期間</th><th>ステータス</th><th></th></tr></thead>
+                <tbody id="reservation-tbody"></tbody>
+              </table>
+            </div>
           </section>
 
           <!-- 予約詳細 -->
@@ -401,16 +420,18 @@
               <h2 style="font-size:1.05rem;">車両管理</h2>
               <button class="btn btn-staff btn-sm">＋ 車両を追加</button>
             </div>
-            <table class="veh-table">
-              <thead><tr><th>車両名</th><th>クラス</th><th>定員</th><th>料金/日</th><th>ステータス</th><th></th></tr></thead>
-              <tbody>
-                <tr><td>ホンダ N-BOX</td><td>軽自動車</td><td>4名</td><td>¥5,500</td><td><span class="pill pill-available">稼働中</span></td><td><button class="btn btn-ghost btn-sm">編集</button></td></tr>
-                <tr><td>ホンダ フィット</td><td>コンパクト</td><td>4名</td><td>¥6,300</td><td><span class="pill pill-available">稼働中</span></td><td><button class="btn btn-ghost btn-sm">編集</button></td></tr>
-                <tr><td>トヨタ カローラ</td><td>普通車</td><td>5名</td><td>¥7,000</td><td><span class="pill pill-available">稼働中</span></td><td><button class="btn btn-ghost btn-sm">編集</button></td></tr>
-                <tr><td>マツダ CX-5</td><td>SUV</td><td>5名</td><td>¥9,800</td><td><span class="pill pill-available">稼働中</span></td><td><button class="btn btn-ghost btn-sm">編集</button></td></tr>
-                <tr><td>トヨタ ハイエース</td><td>ミニバン</td><td>8名</td><td>¥12,000</td><td><span class="pill pill-pending">整備中</span></td><td><button class="btn btn-ghost btn-sm">編集</button></td></tr>
-              </tbody>
-            </table>
+            <div class="table-scroll">
+              <table class="veh-table">
+                <thead><tr><th>車両名</th><th>クラス</th><th>定員</th><th>料金/日</th><th>ステータス</th><th></th></tr></thead>
+                <tbody>
+                  <tr><td>ホンダ N-BOX</td><td>軽自動車</td><td>4名</td><td>¥5,500</td><td><span class="pill pill-available">稼働中</span></td><td><button class="btn btn-ghost btn-sm">編集</button></td></tr>
+                  <tr><td>ホンダ フィット</td><td>コンパクト</td><td>4名</td><td>¥6,300</td><td><span class="pill pill-available">稼働中</span></td><td><button class="btn btn-ghost btn-sm">編集</button></td></tr>
+                  <tr><td>トヨタ カローラ</td><td>普通車</td><td>5名</td><td>¥7,000</td><td><span class="pill pill-available">稼働中</span></td><td><button class="btn btn-ghost btn-sm">編集</button></td></tr>
+                  <tr><td>マツダ CX-5</td><td>SUV</td><td>5名</td><td>¥9,800</td><td><span class="pill pill-available">稼働中</span></td><td><button class="btn btn-ghost btn-sm">編集</button></td></tr>
+                  <tr><td>トヨタ ハイエース</td><td>ミニバン</td><td>8名</td><td>¥12,000</td><td><span class="pill pill-pending">整備中</span></td><td><button class="btn btn-ghost btn-sm">編集</button></td></tr>
+                </tbody>
+              </table>
+            </div>
           </section>
 
         </div>
