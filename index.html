@@ -349,7 +349,6 @@
   .day-cell .dcount { font-size: .6rem; font-weight: 700; color: var(--reef); }
   .day-cell.busy { background: var(--reef-soft); }
   .day-cell.empty { background: transparent; cursor: default; pointer-events: none; }
-  .cal-view[hidden], .cal-grid[hidden] { display: none; }
   .cal-cell { border-radius: 7px; min-height: 30px; background: var(--surface-alt); }
   .cal-cell.confirmed { background: var(--reef); color:#06211F; display:flex; align-items:center; justify-content:center; font-weight:700; }
   .cal-cell.pending { background: var(--pending-soft); border: 1px dashed var(--pending); display:flex; align-items:center; justify-content:center; color:var(--pending); font-weight:700; }
@@ -664,103 +663,131 @@
       </div>
     </div>
 
-    <!-- S2: 予約カレンダー -->
+    <!-- S2-a: 予約カレンダー（月表示） -->
     <div class="frame-col">
       <div class="desktop-frame">
         <div class="desktop-titlebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="path">staff.island-rentacar.example/calendar</span></div>
         <div class="desktop-body">
-
-          <!-- 月表示（最初に出てくるビュー） -->
-          <div class="cal-view" id="monthView">
-            <div class="toolbar">
-              <div class="month-nav"><button>◀</button><span>2026年8月</span><button>▶</button></div>
-              <button class="btn btn-staff btn-sm">＋ 手動予約</button>
-            </div>
-            <div class="month-cal-grid" id="monthGrid">
-              <div class="wd">日</div><div class="wd">月</div><div class="wd">火</div><div class="wd">水</div><div class="wd">木</div><div class="wd">金</div><div class="wd">土</div>
-              <!-- JSで日付セルを生成 -->
-            </div>
-            <div style="font-size:.7rem; color:var(--ink-soft); text-align:center; margin-top:2px;">日付をクリックすると、その日のガントチャートを表示します</div>
+          <div class="toolbar">
+            <div class="month-nav"><button>◀</button><span>2026年8月</span><button>▶</button></div>
+            <button class="btn btn-staff btn-sm">＋ 手動予約</button>
           </div>
-
-          <!-- 日別ガントチャート（日付クリックで表示） -->
-          <div class="cal-view" id="dayView" hidden>
-            <div class="toolbar">
-              <button class="btn btn-ghost btn-sm" id="backToMonth">← 月表示に戻る</button>
-              <span id="selectedDateLabel" style="font-weight:700; font-size:.9rem;"></span>
-            </div>
-
-            <div class="cal-grid" id="dayGanttBusy" hidden>
-              <div></div>
-              <div class="hdr">8:00</div><div class="hdr">10:00</div><div class="hdr">12:00</div><div class="hdr">14:00</div><div class="hdr">16:00</div><div class="hdr">18:00</div>
-
-              <div class="veh-name">N-BOX</div>
-              <div class="cal-cell"></div>
-              <div class="cal-cell confirmed" style="grid-column: span 2;">石垣 太郎</div>
-              <div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div>
-
-              <div class="veh-name">フィット</div>
-              <div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div>
-              <div class="cal-cell confirmed" style="grid-column: span 2;">鈴木 次郎</div>
-              <div class="cal-cell"></div>
-
-              <div class="veh-name">カローラ</div>
-              <div class="cal-cell pending">仮</div>
-              <div class="cal-cell"></div>
-              <div class="cal-cell confirmed" style="grid-column: span 2;">山田 花子</div>
-              <div class="cal-cell"></div><div class="cal-cell"></div>
-
-              <div class="veh-name">CX-5</div>
-              <div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div>
-              <div class="cal-cell pending">仮</div>
-              <div class="cal-cell confirmed" style="grid-column: span 2;">田中 一郎</div>
-
-              <div class="veh-name">ハイエース</div>
-              <div class="cal-cell blocked"></div><div class="cal-cell blocked"></div>
-              <div class="cal-cell confirmed" style="grid-column: span 3;">団体旅行 8名</div>
-              <div class="cal-cell"></div>
-            </div>
-
-            <div class="cal-grid" id="dayGanttQuiet" hidden>
-              <div></div>
-              <div class="hdr">8:00</div><div class="hdr">10:00</div><div class="hdr">12:00</div><div class="hdr">14:00</div><div class="hdr">16:00</div><div class="hdr">18:00</div>
-
-              <div class="veh-name">N-BOX</div>
-              <div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div>
-
-              <div class="veh-name">フィット</div>
-              <div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div>
-
-              <div class="veh-name">カローラ</div>
-              <div class="cal-cell pending">仮</div>
-              <div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div>
-
-              <div class="veh-name">CX-5</div>
-              <div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div>
-
-              <div class="veh-name">ハイエース</div>
-              <div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div>
-            </div>
-
-            <div class="legend">
-              <div class="item"><span class="swatch" style="background:var(--reef);"></span>確定</div>
-              <div class="item"><span class="swatch" style="background:var(--pending-soft); border:1px dashed var(--pending);"></span>仮予約</div>
-              <div class="item"><span class="swatch" style="background:repeating-linear-gradient(135deg, var(--unavailable-soft), var(--unavailable-soft) 3px, var(--surface-alt) 3px, var(--surface-alt) 6px);"></span>整備・点検</div>
-              <div class="item"><span class="swatch" style="background:var(--surface-alt); border:1px solid var(--line);"></span>空き</div>
-            </div>
+          <div class="month-cal-grid">
+            <div class="wd">日</div><div class="wd">月</div><div class="wd">火</div><div class="wd">水</div><div class="wd">木</div><div class="wd">金</div><div class="wd">土</div>
+            <div class="day-cell empty"></div><div class="day-cell empty"></div><div class="day-cell empty"></div><div class="day-cell empty"></div><div class="day-cell empty"></div><div class="day-cell empty"></div>
+            <div class="day-cell"><span class="dnum">1</span></div>
+            <div class="day-cell"><span class="dnum">2</span></div><div class="day-cell"><span class="dnum">3</span></div><div class="day-cell"><span class="dnum">4</span></div><div class="day-cell"><span class="dnum">5</span></div><div class="day-cell"><span class="dnum">6</span></div><div class="day-cell"><span class="dnum">7</span></div><div class="day-cell"><span class="dnum">8</span></div>
+            <div class="day-cell"><span class="dnum">9</span></div><div class="day-cell"><span class="dnum">10</span></div>
+            <div class="day-cell busy"><span class="dnum">11</span><span class="dcount">1件</span></div>
+            <div class="day-cell busy"><span class="dnum">12</span><span class="dcount">2件</span></div>
+            <div class="day-cell busy"><span class="dnum">13</span><span class="dcount">2件</span></div>
+            <div class="day-cell busy"><span class="dnum">14</span><span class="dcount">3件</span></div>
+            <div class="day-cell busy"><span class="dnum">15</span><span class="dcount">3件</span></div>
+            <div class="day-cell busy"><span class="dnum">16</span><span class="dcount">1件</span></div>
+            <div class="day-cell"><span class="dnum">17</span></div><div class="day-cell"><span class="dnum">18</span></div><div class="day-cell"><span class="dnum">19</span></div><div class="day-cell"><span class="dnum">20</span></div><div class="day-cell"><span class="dnum">21</span></div><div class="day-cell"><span class="dnum">22</span></div>
+            <div class="day-cell"><span class="dnum">23</span></div><div class="day-cell"><span class="dnum">24</span></div><div class="day-cell"><span class="dnum">25</span></div><div class="day-cell"><span class="dnum">26</span></div><div class="day-cell"><span class="dnum">27</span></div><div class="day-cell"><span class="dnum">28</span></div><div class="day-cell"><span class="dnum">29</span></div>
+            <div class="day-cell"><span class="dnum">30</span></div><div class="day-cell"><span class="dnum">31</span></div>
+            <div class="day-cell empty"></div><div class="day-cell empty"></div><div class="day-cell empty"></div><div class="day-cell empty"></div><div class="day-cell empty"></div>
           </div>
-
+          <div style="font-size:.7rem; color:var(--ink-soft); text-align:center; margin-top:2px;">日付をクリックすると、その日のガントチャート（02-b）を表示</div>
         </div>
       </div>
       <div class="frame-caption">
-        <div class="no">02 — スタッフ向け</div>
-        <h3>予約カレンダー</h3>
-        <p>最初は普通の月表示カレンダーが出てくる。日付をクリックすると、その日の車両×時間帯のガントチャートに切り替わる（お客様向け画面と同じ5車種を表示、Supabase Realtimeで即時反映）。</p>
+        <div class="no">02-a — スタッフ向け</div>
+        <h3>予約カレンダー（月表示）</h3>
+        <p>予約カレンダーを開くと最初に出てくる画面。件数バッジのある日をクリックすると、その日の詳細なガントチャート(02-b)に切り替わる。</p>
       </div>
     </div>
 
-    <!-- S3: 予約詳細 -->
+    <!-- S2-b: 予約カレンダー（日別ガントチャート） -->
     <div class="frame-col">
+      <div class="desktop-frame">
+        <div class="desktop-titlebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="path">staff.island-rentacar.example/calendar/2026-08-12</span></div>
+        <div class="desktop-body">
+          <div class="toolbar">
+            <button class="btn btn-ghost btn-sm">← 月表示（02-a）に戻る</button>
+            <span style="font-weight:700; font-size:.9rem;">2026年8月12日（水）</span>
+          </div>
+
+          <div class="cal-grid">
+            <div></div>
+            <div class="hdr">8:00</div><div class="hdr">10:00</div><div class="hdr">12:00</div><div class="hdr">14:00</div><div class="hdr">16:00</div><div class="hdr">18:00</div>
+
+            <div class="veh-name">N-BOX</div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell confirmed" style="grid-column: span 2;">石垣 太郎</div>
+            <div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div>
+
+            <div class="veh-name">フィット</div>
+            <div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div>
+            <div class="cal-cell confirmed" style="grid-column: span 2;">鈴木 次郎</div>
+            <div class="cal-cell"></div>
+
+            <div class="veh-name">カローラ</div>
+            <div class="cal-cell pending">仮</div>
+            <div class="cal-cell"></div>
+            <div class="cal-cell confirmed" style="grid-column: span 2;">山田 花子</div>
+            <div class="cal-cell"></div><div class="cal-cell"></div>
+
+            <div class="veh-name">CX-5</div>
+            <div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div>
+            <div class="cal-cell pending">仮</div>
+            <div class="cal-cell confirmed" style="grid-column: span 2;">田中 一郎</div>
+
+            <div class="veh-name">ハイエース</div>
+            <div class="cal-cell blocked"></div><div class="cal-cell blocked"></div>
+            <div class="cal-cell confirmed" style="grid-column: span 3;">団体旅行 8名</div>
+            <div class="cal-cell"></div>
+          </div>
+
+          <div class="legend">
+            <div class="item"><span class="swatch" style="background:var(--reef);"></span>確定</div>
+            <div class="item"><span class="swatch" style="background:var(--pending-soft); border:1px dashed var(--pending);"></span>仮予約</div>
+            <div class="item"><span class="swatch" style="background:repeating-linear-gradient(135deg, var(--unavailable-soft), var(--unavailable-soft) 3px, var(--surface-alt) 3px, var(--surface-alt) 6px);"></span>整備・点検</div>
+            <div class="item"><span class="swatch" style="background:var(--surface-alt); border:1px solid var(--line);"></span>空き</div>
+          </div>
+        </div>
+      </div>
+      <div class="frame-caption">
+        <div class="no">02-b — スタッフ向け</div>
+        <h3>予約カレンダー（日別ガントチャート）</h3>
+        <p>02-aで日付をクリックした後に表示される画面。車両×時間帯で、その日の貸出・返却状況を一目で確認できる。お客様の仮予約はSupabase Realtimeで即時反映される。</p>
+      </div>
+    </div>
+
+    <!-- S3: 予約一覧 -->
+    <div class="frame-col">
+      <div class="desktop-frame">
+        <div class="desktop-titlebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="path">staff.island-rentacar.example/reservations</span></div>
+        <div class="desktop-body">
+          <div class="toolbar">
+            <h2 style="font-size:1.05rem;">予約一覧</h2>
+            <button class="btn btn-staff btn-sm">＋ 手動予約</button>
+          </div>
+
+          <table class="veh-table">
+            <thead><tr><th>予約番号</th><th>お客様</th><th>車両</th><th>期間</th><th>ステータス</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>SR-20260812-047</td><td>石垣 太郎</td><td>N-BOX</td><td>8/12〜8/14</td><td><span class="pill pill-pending">仮予約</span></td><td><button class="btn btn-ghost btn-sm reservation-link" data-target="detailFrame">詳細を見る</button></td></tr>
+              <tr><td>SR-20260814-048</td><td>鈴木 次郎</td><td>フィット</td><td>8/14〜8/16</td><td><span class="pill pill-available">確定</span></td><td><button class="btn btn-ghost btn-sm reservation-link" data-target="detailFrame">詳細を見る</button></td></tr>
+              <tr><td>SR-20260811-046</td><td>浦崎 実</td><td>カローラ</td><td>8/11</td><td><span class="pill pill-pending">仮予約</span></td><td><button class="btn btn-ghost btn-sm reservation-link" data-target="detailFrame">詳細を見る</button></td></tr>
+              <tr><td>SR-20260814-050</td><td>山田 花子</td><td>カローラ</td><td>8/14〜8/16</td><td><span class="pill pill-available">確定</span></td><td><button class="btn btn-ghost btn-sm reservation-link" data-target="detailFrame">詳細を見る</button></td></tr>
+              <tr><td>SR-20260812-051</td><td>団体旅行(8名)</td><td>ハイエース</td><td>8/12〜8/15</td><td><span class="pill pill-available">確定</span></td><td><button class="btn btn-ghost btn-sm reservation-link" data-target="detailFrame">詳細を見る</button></td></tr>
+              <tr><td>SR-20260816-052</td><td>田中 一郎</td><td>CX-5</td><td>8/16</td><td><span class="pill pill-pending">仮予約</span></td><td><button class="btn btn-ghost btn-sm reservation-link" data-target="detailFrame">詳細を見る</button></td></tr>
+            </tbody>
+          </table>
+          <div style="font-size:.7rem; color:var(--ink-soft);">※このモックアップでは「詳細を見る」は全行共通の予約詳細サンプル(04)に遷移します。実装時は選択した予約の内容に置き換わります。</div>
+        </div>
+      </div>
+      <div class="frame-caption">
+        <div class="no">03 — スタッフ向け</div>
+        <h3>予約一覧</h3>
+        <p>予約詳細の前に一覧をはさみ、ここから個別の予約詳細ページへ遷移する。行数が増えても一覧性を保てる表形式。</p>
+      </div>
+    </div>
+
+    <!-- S4: 予約詳細 -->
+    <div class="frame-col" id="detailFrame">
       <div class="desktop-frame">
         <div class="desktop-titlebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="path">staff.island-rentacar.example/reservations/047</span></div>
         <div class="desktop-body">
@@ -787,13 +814,13 @@
         </div>
       </div>
       <div class="frame-caption">
-        <div class="no">03 — スタッフ向け</div>
+        <div class="no">04 — スタッフ向け</div>
         <h3>予約詳細</h3>
         <p>仮予約(pending)を確認し「確定」操作でconfirmedへ状態遷移。電話再確認なしで完結する。</p>
       </div>
     </div>
 
-    <!-- S4: 車両管理 -->
+    <!-- S5: 車両管理 -->
     <div class="frame-col">
       <div class="desktop-frame">
         <div class="desktop-titlebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="path">staff.island-rentacar.example/vehicles</span></div>
@@ -814,7 +841,7 @@
         </div>
       </div>
       <div class="frame-caption">
-        <div class="no">04 — スタッフ向け</div>
+        <div class="no">05 — スタッフ向け</div>
         <h3>車両管理</h3>
         <p>整備・点検ブロック設定で該当期間を自動的に予約不可にする(ダブルブッキング防止と同じDB制約で保護)。</p>
       </div>
@@ -838,52 +865,12 @@
     });
   });
 
-  // ---- S2: 月表示カレンダー ----
-  (function () {
-    var monthGrid = document.getElementById('monthGrid');
-    if (!monthGrid) return;
-
-    var weekdays = ['日','月','火','水','木','金','土'];
-    var leadingBlanks = 6; // 2026年8月1日は土曜日
-    var daysInMonth = 31;
-    var busyCounts = { 11: 1, 12: 2, 13: 2, 14: 3, 15: 3, 16: 1 };
-
-    for (var i = 0; i < leadingBlanks; i++) {
-      var blank = document.createElement('div');
-      blank.className = 'day-cell empty';
-      monthGrid.appendChild(blank);
-    }
-    for (var d = 1; d <= daysInMonth; d++) {
-      var cell = document.createElement('div');
-      var count = busyCounts[d];
-      cell.className = 'day-cell' + (count ? ' busy' : '');
-      cell.setAttribute('data-day', d);
-      cell.innerHTML = '<span class="dnum">' + d + '</span>' + (count ? '<span class="dcount">' + count + '件</span>' : '');
-      monthGrid.appendChild(cell);
-    }
-
-    var monthView = document.getElementById('monthView');
-    var dayView = document.getElementById('dayView');
-    var dateLabel = document.getElementById('selectedDateLabel');
-    var ganttBusy = document.getElementById('dayGanttBusy');
-    var ganttQuiet = document.getElementById('dayGanttQuiet');
-
-    monthGrid.addEventListener('click', function (e) {
-      var cell = e.target.closest('.day-cell[data-day]');
-      if (!cell) return;
-      var day = parseInt(cell.getAttribute('data-day'), 10);
-      var wd = weekdays[(day + 5) % 7]; // 2026年8月1日(土)を基準に曜日を算出
-      dateLabel.textContent = '2026年8月' + day + '日(' + wd + ')';
-      var busy = !!busyCounts[day];
-      ganttBusy.hidden = !busy;
-      ganttQuiet.hidden = busy;
-      monthView.hidden = true;
-      dayView.hidden = false;
+  // ---- S3: 予約一覧 → 予約詳細へのリンク ----
+  document.querySelectorAll('.reservation-link').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var targetId = btn.getAttribute('data-target');
+      var target = document.getElementById(targetId);
+      if (target) target.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
     });
-
-    document.getElementById('backToMonth').addEventListener('click', function () {
-      dayView.hidden = true;
-      monthView.hidden = false;
-    });
-  })();
+  });
 </script>
