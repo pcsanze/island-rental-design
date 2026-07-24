@@ -53,6 +53,7 @@
   * { box-sizing: border-box; }
   body {
     margin: 0;
+    overflow-x: hidden;
     background: var(--paper);
     color: var(--ink);
     font-family: var(--font-body);
@@ -78,7 +79,7 @@
 
   /* ---- phone chrome ---- */
   .phone-frame {
-    width: 380px; margin: 0 auto;
+    width: 100%; max-width: 380px; margin: 0 auto;
     border-radius: 30px; background: var(--surface);
     box-shadow: var(--shadow), 0 0 0 1px var(--line);
     overflow: hidden;
@@ -101,7 +102,8 @@
   .field-label { font-size: .74rem; font-weight: 600; color: var(--ink-soft); margin-bottom: 6px; display: block; }
   .field { width: 100%; padding: 11px 13px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-alt); color: var(--ink); font-size: .88rem; }
   .field-row { display: flex; gap: 10px; }
-  .field-row > div { flex: 1; }
+  .field-row > div { flex: 1; min-width: 0; }
+  .field-row input[type="date"], .field-row select { min-width: 0; width: 100%; }
   .btn { border-radius: 11px; padding: 13px 18px; font-size: .9rem; font-weight: 700; border: none; text-align: center; }
   .btn-primary { background: var(--coral); color: #FFF6F2; }
   .btn-staff { background: var(--reef); color: #06211F; }
@@ -233,7 +235,6 @@
     .toolbar { gap: 8px; }
     .login-card { width: 100%; padding: 24px; }
     .staffnav { overflow-x: auto; white-space: nowrap; }
-    .phone-frame { width: 100%; max-width: 380px; }
   }
 </style>
 
