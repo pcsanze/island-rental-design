@@ -1,0 +1,818 @@
+<title>レンタカー予約システム — 動作プロトタイプ</title>
+<style>
+  :root {
+    --paper: #EFF6F5;
+    --surface: #FFFFFF;
+    --surface-alt: #E4EFEE;
+    --ink: #10282C;
+    --ink-soft: #4B6B6E;
+    --line: rgba(14,46,51,0.14);
+    --reef: #17A6A0;
+    --reef-soft: #DCF3F1;
+    --coral: #E0522F;
+    --coral-soft: #FBE2D9;
+    --available: #2E9B5C;
+    --available-soft: #DEF0E4;
+    --pending: #C68A1F;
+    --pending-soft: #F6E7C9;
+    --unavailable: #B23A3A;
+    --unavailable-soft: #F3DCDC;
+    --shadow: 0 20px 44px -24px rgba(9,32,36,.45);
+    --font-display: 'Century Gothic','Futura','Avenir Next',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --font-body: 'Hiragino Sans','Yu Gothic Medium','Yu Gothic','Noto Sans JP',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #081A1D; --surface: #0F2C30; --surface-alt: #123539;
+      --ink: #DCEEEC; --ink-soft: #8FB3B2; --line: rgba(220,238,236,0.14);
+      --reef: #3FC2BB; --reef-soft: #123B3B; --coral: #FF8862; --coral-soft: #3A2420;
+      --available: #59C889; --available-soft: #123B2A;
+      --pending: #E3B255; --pending-soft: #3B2E13;
+      --unavailable: #E37676; --unavailable-soft: #3B1E1E;
+      --shadow: 0 24px 48px -20px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #081A1D; --surface: #0F2C30; --surface-alt: #123539;
+    --ink: #DCEEEC; --ink-soft: #8FB3B2; --line: rgba(220,238,236,0.14);
+    --reef: #3FC2BB; --reef-soft: #123B3B; --coral: #FF8862; --coral-soft: #3A2420;
+    --available: #59C889; --available-soft: #123B2A;
+    --pending: #E3B255; --pending-soft: #3B2E13;
+    --unavailable: #E37676; --unavailable-soft: #3B1E1E;
+    --shadow: 0 24px 48px -20px rgba(0,0,0,.6);
+  }
+  :root[data-theme="light"] {
+    --paper: #EFF6F5; --surface: #FFFFFF; --surface-alt: #E4EFEE;
+    --ink: #10282C; --ink-soft: #4B6B6E; --line: rgba(14,46,51,0.14);
+    --reef: #17A6A0; --reef-soft: #DCF3F1; --coral: #E0522F; --coral-soft: #FBE2D9;
+    --available: #2E9B5C; --available-soft: #DEF0E4;
+    --pending: #C68A1F; --pending-soft: #F6E7C9;
+    --unavailable: #B23A3A; --unavailable-soft: #F3DCDC;
+    --shadow: 0 20px 44px -24px rgba(9,32,36,.45);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 { text-wrap: balance; margin: 0; }
+  button { font-family: inherit; cursor: pointer; }
+  input, select { font-family: inherit; }
+  [hidden] { display: none !important; }
+
+  /* ---- top bar ---- */
+  header.topbar {
+    position: sticky; top: 0; z-index: 20;
+    background: var(--surface); border-bottom: 1px solid var(--line);
+    padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .brandmark { font-family: var(--font-display); font-size: .78rem; letter-spacing: .16em; font-weight: 700; color: var(--reef); text-transform: uppercase; }
+  .modetabs { display: inline-flex; gap: 4px; padding: 4px; background: var(--surface-alt); border-radius: 999px; border: 1px solid var(--line); }
+  .modetab { border: none; background: transparent; color: var(--ink-soft); font-size: .82rem; font-weight: 600; padding: 7px 16px; border-radius: 999px; }
+  .modetab.active { background: var(--reef); color: #06211F; }
+
+  main { padding: 32px 16px 80px; }
+
+  /* ---- phone chrome ---- */
+  .phone-frame {
+    width: 380px; margin: 0 auto;
+    border-radius: 30px; background: var(--surface);
+    box-shadow: var(--shadow), 0 0 0 1px var(--line);
+    overflow: hidden;
+  }
+  .phone-status { display: flex; justify-content: space-between; align-items: center; padding: 12px 22px 4px; font-size: .72rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .phone-status .dots { display:flex; gap:3px; }
+  .phone-status .dots span { width:4px; height:4px; border-radius:50%; background: var(--ink-soft); display:block; }
+  .phone-body { padding: 10px 20px 30px; display: flex; flex-direction: column; gap: 16px; }
+
+  /* ---- desktop chrome ---- */
+  .desktop-frame { width: 100%; max-width: 860px; margin: 0 auto; border-radius: 16px; background: var(--surface); box-shadow: var(--shadow), 0 0 0 1px var(--line); overflow: hidden; }
+  .desktop-titlebar { display: flex; align-items: center; gap: 7px; height: 34px; padding: 0 14px; background: var(--surface-alt); border-bottom: 1px solid var(--line); }
+  .desktop-titlebar .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+  .desktop-titlebar .path { margin-left: 10px; font-size: .72rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .desktop-body { padding: 26px 30px 34px; display: flex; flex-direction: column; gap: 20px; min-height: 480px; }
+
+  /* ---- shared atoms ---- */
+  .app-top { display: flex; align-items: center; justify-content: space-between; }
+  .app-top .mark { font-family: var(--font-display); font-size: .66rem; letter-spacing: .12em; font-weight: 700; color: var(--reef); text-transform: uppercase; }
+  .field-label { font-size: .74rem; font-weight: 600; color: var(--ink-soft); margin-bottom: 6px; display: block; }
+  .field { width: 100%; padding: 11px 13px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-alt); color: var(--ink); font-size: .88rem; }
+  .field-row { display: flex; gap: 10px; }
+  .field-row > div { flex: 1; }
+  .btn { border-radius: 11px; padding: 13px 18px; font-size: .9rem; font-weight: 700; border: none; text-align: center; }
+  .btn-primary { background: var(--coral); color: #FFF6F2; }
+  .btn-staff { background: var(--reef); color: #06211F; }
+  .btn-ghost { background: transparent; border: 1px solid var(--line); color: var(--ink); }
+  .btn-block { width: 100%; }
+  .btn-sm { padding: 8px 14px; font-size: .8rem; border-radius: 8px; }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  .pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: .72rem; font-weight: 700; }
+  .pill-available { background: var(--available-soft); color: var(--available); }
+  .pill-pending { background: var(--pending-soft); color: var(--pending); }
+  .pill-unavailable { background: var(--unavailable-soft); color: var(--unavailable); }
+  .pill::before { content:""; width:6px; height:6px; border-radius:50%; background: currentColor; }
+
+  .car-icon { display:block; }
+  .mini-label { font-family: var(--font-display); font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); margin-top: 6px; }
+
+  .veh-card { display: flex; gap: 12px; align-items: center; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-alt); }
+  .veh-card.selectable { cursor: pointer; transition: border-color .12s ease; }
+  .veh-card.selectable:hover { border-color: var(--reef); }
+  .veh-card .icon-wrap { width: 52px; height: 52px; border-radius: 10px; background: var(--reef-soft); color: var(--reef); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .veh-main { flex: 1; min-width: 0; }
+  .veh-main .name { font-size: .88rem; font-weight: 700; }
+  .veh-main .spec { font-size: .74rem; color: var(--ink-soft); margin-top: 2px; }
+  .veh-price { text-align: right; }
+  .veh-price .amount { font-size: 1.02rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .veh-price .unit { font-size: .68rem; color: var(--ink-soft); }
+
+  .perk-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+  .perk-grid .perk { text-align:center; padding: 10px 6px; border-radius: 10px; background: var(--surface-alt); }
+  .perk-grid .perk .ico { color: var(--reef); margin-bottom: 4px; display:flex; justify-content:center; }
+  .perk-grid .perk .label { font-size: .66rem; font-weight: 700; line-height: 1.3; }
+
+  .mini-footer { margin-top: 8px; padding-top: 14px; border-top: 1px solid var(--line); text-align: center; display: flex; flex-direction: column; gap: 6px; }
+  .mini-footer .mf-name { font-size: .74rem; font-weight: 700; }
+  .mini-footer .mf-tel { font-size: .7rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .mini-footer .mf-links { font-size: .66rem; color: var(--ink-soft); }
+  .mini-footer .mf-links a { color: var(--ink-soft); text-decoration: underline; text-underline-offset: 2px; }
+
+  .summary-strip { display: flex; gap: 12px; align-items: center; padding: 12px; border-radius: 12px; background: var(--reef-soft); }
+  .summary-strip .icon-wrap { background: var(--surface); color: var(--reef); }
+  .summary-strip .meta { font-size: .74rem; color: var(--ink-soft); line-height: 1.5; }
+  .divider { height: 1px; background: var(--line); border: none; margin: 2px 0; }
+  .checkline { display: flex; align-items: flex-start; gap: 9px; font-size: .78rem; color: var(--ink-soft); }
+  .checkline input { margin-top: 3px; }
+  .errmsg { font-size: .74rem; color: var(--unavailable); min-height: 1.2em; }
+
+  .complete-badge { width: 58px; height: 58px; border-radius: 50%; background: var(--reef-soft); color: var(--reef); display: flex; align-items: center; justify-content: center; margin: 8px auto 0; }
+  .complete-heading { text-align: center; }
+  .complete-heading h2 { font-size: 1.05rem; }
+  .code-block { text-align: center; padding: 16px; border-radius: 12px; background: var(--surface-alt); border: 1px dashed var(--line); }
+  .code-block .label { font-size: .68rem; color: var(--ink-soft); letter-spacing: .1em; }
+  .code-block .code { font-size: 1.2rem; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 4px; }
+  .receipt { border-radius: 12px; border: 1px solid var(--line); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; font-size: .8rem; }
+  .receipt .row { display: flex; justify-content: space-between; color: var(--ink-soft); }
+  .receipt .row span:last-child { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  .login-wrap { flex:1; display:flex; align-items:center; justify-content:center; min-height: 420px; }
+  .login-card { width: 340px; padding: 32px; border-radius: 16px; background: var(--surface-alt); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 16px; }
+  .login-card .mark { text-align:center; }
+  .login-card .sub { text-align:center; font-size: .78rem; color: var(--ink-soft); margin-top: 4px; }
+
+  .toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .month-nav { display:flex; align-items:center; gap:12px; font-size:.86rem; font-weight:700; }
+  .month-nav button { background:none; border:none; color: var(--ink-soft); font-size: 1rem; }
+
+  .staffnav { display: flex; gap: 6px; border-bottom: 1px solid var(--line); padding-bottom: 2px; }
+  .staffnav button { border: none; background: transparent; color: var(--ink-soft); font-size: .82rem; font-weight: 600; padding: 10px 14px; border-bottom: 2px solid transparent; }
+  .staffnav button.active { color: var(--reef); border-bottom-color: var(--reef); }
+
+  .cal-grid { display: grid; grid-template-columns: 96px repeat(6, 1fr); gap: 6px; font-size: .72rem; }
+  .cal-grid .hdr { color: var(--ink-soft); text-align:center; padding: 4px 0; font-variant-numeric: tabular-nums; }
+  .cal-grid .veh-name { display:flex; align-items:center; font-weight: 700; font-size: .74rem; }
+
+  .month-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 4px; }
+  .month-cal-grid .wd { text-align:center; font-size:.7rem; color: var(--ink-soft); padding: 2px 0 6px; }
+  .day-cell { aspect-ratio: 1.3; border-radius: 9px; background: var(--surface-alt); border: 1px solid transparent; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; transition: border-color .12s ease; }
+  .day-cell:hover { border-color: var(--reef); }
+  .day-cell .dnum { font-size: .82rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .day-cell .dcount { font-size: .6rem; font-weight: 700; color: var(--reef); }
+  .day-cell.busy { background: var(--reef-soft); }
+  .day-cell.empty { background: transparent; cursor: default; pointer-events: none; }
+
+  .cal-cell { border-radius: 7px; min-height: 30px; background: var(--surface-alt); }
+  .cal-cell.confirmed { background: var(--reef); color:#06211F; display:flex; align-items:center; justify-content:center; font-weight:700; }
+  .cal-cell.pending { background: var(--pending-soft); border: 1px dashed var(--pending); display:flex; align-items:center; justify-content:center; color:var(--pending); font-weight:700; }
+  .cal-cell.blocked { background: repeating-linear-gradient(135deg, var(--unavailable-soft), var(--unavailable-soft) 4px, var(--surface-alt) 4px, var(--surface-alt) 8px); }
+  .legend { display:flex; gap:16px; font-size: .74rem; color: var(--ink-soft); flex-wrap: wrap; }
+  .legend .item { display:flex; align-items:center; gap:6px; }
+  .legend .swatch { width:12px; height:12px; border-radius:4px; }
+
+  .detail-card { border-radius: 14px; border: 1px solid var(--line); padding: 22px; display:flex; flex-direction:column; gap:16px; }
+  .detail-head { display:flex; justify-content:space-between; align-items:flex-start; }
+  .detail-head .id { font-family: var(--font-display); font-size:.72rem; letter-spacing:.08em; color: var(--ink-soft); }
+  .kv-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 14px 24px; }
+  .kv-grid .k { font-size:.7rem; color: var(--ink-soft); }
+  .kv-grid .v { font-size:.86rem; font-weight:600; margin-top:2px; }
+  .kv-grid .full { grid-column: 1 / -1; }
+  .detail-actions { display:flex; gap:10px; }
+
+  table.veh-table { width:100%; border-collapse: collapse; font-size:.82rem; }
+  table.veh-table th { text-align:left; font-size:.7rem; color:var(--ink-soft); font-weight:600; padding: 0 12px 10px; }
+  table.veh-table td { padding: 12px; border-top: 1px solid var(--line); }
+  table.veh-table tr td:first-child, table.veh-table tr th:first-child { padding-left: 4px; }
+  table.veh-table tr.clickable { cursor: pointer; }
+  table.veh-table tr.clickable:hover { background: var(--surface-alt); }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(0);
+    background: var(--ink); color: var(--paper); padding: 12px 22px; border-radius: 999px;
+    font-size: .82rem; font-weight: 600; box-shadow: var(--shadow); z-index: 50;
+    opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(-8px); }
+
+  footer.note { margin: 52px auto 0; padding-top: 20px; border-top: 1px solid var(--line); font-size: .78rem; color: var(--ink-soft); line-height: 1.7; max-width: 860px; text-align: center; }
+</style>
+
+<header class="topbar">
+  <span class="brandmark">Island Rent-a-Car</span>
+  <div class="modetabs" role="tablist">
+    <button class="modetab active" data-target="app-customer" type="button">お客様として利用</button>
+    <button class="modetab" data-target="app-staff" type="button">スタッフとしてログイン</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ 顧客フロー ============ -->
+  <div id="app-customer">
+    <div class="phone-frame">
+      <div class="phone-status"><span>9:41</span><span class="dots"><span></span><span></span><span></span></span></div>
+      <div class="phone-body">
+
+        <!-- 1. トップ -->
+        <section id="cust-top" class="page">
+          <div class="app-top"><span class="mark">Island Rent-a-Car</span></div>
+          <h2 style="font-size:1.05rem;">日程・拠点を選ぶ</h2>
+
+          <div>
+            <span class="field-label">貸出店舗</span>
+            <select class="field" id="f-pickup-loc">
+              <option>石垣港離島ターミナル店</option>
+              <option>新石垣空港店</option>
+            </select>
+          </div>
+          <div class="field-row">
+            <div><span class="field-label">貸出日</span><input class="field" type="date" id="f-pickup-date" value="2026-08-12"></div>
+            <div><span class="field-label">時間</span><select class="field" id="f-pickup-time"><option>10:00</option><option>9:00</option><option>14:00</option></select></div>
+          </div>
+          <div class="field-row">
+            <div><span class="field-label">返却日</span><input class="field" type="date" id="f-return-date" value="2026-08-14"></div>
+            <div><span class="field-label">時間</span><select class="field" id="f-return-time"><option>10:00</option><option>9:00</option><option>18:00</option></select></div>
+          </div>
+          <div>
+            <span class="field-label">返却店舗</span>
+            <select class="field" id="f-return-loc"><option>貸出店舗と同じ</option><option>新石垣空港店</option></select>
+          </div>
+          <div class="errmsg" id="top-err"></div>
+          <button class="btn btn-primary btn-block" id="btn-search">空き車両を探す</button>
+
+          <div class="mini-label">車種ラインナップ</div>
+          <div id="lineup-preview"></div>
+
+          <div class="mini-label">選ばれるポイント</div>
+          <div class="perk-grid">
+            <div class="perk"><div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M2 16l4-9h12l4 9M2 16h20M6 16v3M18 16v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="label">新石垣空港<br>送迎対応</div></div>
+            <div class="perk"><div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="7" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><circle cx="17" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M10 12h4" stroke="currentColor" stroke-width="1.8"/></svg></div><div class="label">2拠点で<br>乗り捨てOK</div></div>
+            <div class="perk"><div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div><div class="label">その場で<br>即予約</div></div>
+          </div>
+
+          <div class="mini-footer">
+            <div class="mf-name">株式会社斎喜自動車工業所</div>
+            <div class="mf-tel">☎ 0980-XX-XXXX（受付 8:00〜19:00）</div>
+            <div class="mf-links"><a href="#">利用規約</a>・<a href="#">よくあるご質問</a>・<a href="#">会社概要</a></div>
+          </div>
+        </section>
+
+        <!-- 2. 空き車両一覧 -->
+        <section id="cust-list" class="page" hidden>
+          <div class="app-top"><span class="mark">Island Rent-a-Car</span><button class="btn btn-ghost btn-sm" id="btn-back-top">条件を変更</button></div>
+          <div style="font-size:.76rem; color:var(--ink-soft);" id="search-summary"></div>
+          <div id="veh-list"></div>
+        </section>
+
+        <!-- 3. 予約フォーム -->
+        <section id="cust-form" class="page" hidden>
+          <div class="app-top"><span class="mark">Island Rent-a-Car</span></div>
+          <h2 style="font-size:1.05rem;">予約者情報の入力</h2>
+          <div class="summary-strip" id="form-summary"></div>
+          <div><span class="field-label">お名前</span><input class="field" id="f-name" placeholder="石垣 太郎"></div>
+          <div><span class="field-label">電話番号</span><input class="field" id="f-phone" placeholder="090-0000-0000"></div>
+          <div><span class="field-label">メールアドレス</span><input class="field" id="f-email" placeholder="taro@example.com"></div>
+          <div class="checkline"><input type="checkbox"><span>当日は運転免許証をご持参ください。予約確定後、担当より折り返しご連絡します。</span></div>
+          <div class="checkline"><input type="checkbox" id="f-agree" checked><span>予約規定・キャンセルポリシーに同意する</span></div>
+          <div class="errmsg" id="form-err"></div>
+          <button class="btn btn-primary btn-block" id="btn-submit-form">仮予約を確定する</button>
+        </section>
+
+        <!-- 4. 予約完了 -->
+        <section id="cust-complete" class="page" hidden>
+          <div class="app-top"><span class="mark">Island Rent-a-Car</span></div>
+          <div class="complete-badge"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="complete-heading"><h2>仮予約を受け付けました</h2></div>
+          <div class="code-block"><div class="label">予約番号</div><div class="code" id="complete-code"></div></div>
+          <div class="receipt" id="complete-receipt"></div>
+          <div style="font-size:.76rem; color:var(--ink-soft); text-align:center;">内容確認後、担当より1〜2時間以内にご連絡します</div>
+          <button class="btn btn-ghost btn-block" id="btn-new-booking">別の予約をする（トップに戻る）</button>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ スタッフフロー ============ -->
+  <div id="app-staff" hidden>
+
+    <!-- ログイン -->
+    <div id="staff-login-wrap">
+      <div class="desktop-frame">
+        <div class="desktop-titlebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="path">staff.island-rentacar.example/login</span></div>
+        <div class="desktop-body">
+          <div class="login-wrap">
+            <div class="login-card">
+              <div class="mark"><span class="brandmark">Island Rent-a-Car</span><div class="sub">予約管理システム</div></div>
+              <div><span class="field-label">メールアドレス</span><input class="field" id="s-email" placeholder="staff@example.jp"></div>
+              <div><span class="field-label">パスワード</span><input class="field" type="password" id="s-pass" placeholder="••••••••"></div>
+              <div class="errmsg" id="login-err"></div>
+              <button class="btn btn-staff btn-block" id="btn-login">ログイン</button>
+              <div style="font-size:.7rem; color:var(--ink-soft); text-align:center;">デモ用：メール・パスワードは任意の文字列でログインできます</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ログイン後シェル -->
+    <div id="staff-shell" hidden>
+      <div class="desktop-frame">
+        <div class="desktop-titlebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="path" id="staff-path">staff.island-rentacar.example/calendar</span></div>
+        <div class="desktop-body">
+          <div class="staffnav">
+            <button class="active" data-nav="staff-cal-month">予約カレンダー</button>
+            <button data-nav="staff-list">予約一覧</button>
+            <button data-nav="staff-vehicles">車両管理</button>
+            <button class="btn-ghost" style="margin-left:auto; border:none; font-size:.78rem;" id="btn-logout">ログアウト</button>
+          </div>
+
+          <!-- 予約カレンダー：月表示 -->
+          <section id="staff-cal-month" class="page">
+            <div class="toolbar">
+              <div class="month-nav"><button>◀</button><span>2026年8月</span><button>▶</button></div>
+              <button class="btn btn-staff btn-sm">＋ 手動予約</button>
+            </div>
+            <div class="month-cal-grid" id="monthGrid">
+              <div class="wd">日</div><div class="wd">月</div><div class="wd">火</div><div class="wd">水</div><div class="wd">木</div><div class="wd">金</div><div class="wd">土</div>
+            </div>
+            <div style="font-size:.7rem; color:var(--ink-soft); text-align:center;">日付をクリックすると、その日のガントチャートを表示します</div>
+          </section>
+
+          <!-- 予約カレンダー：日別ガント -->
+          <section id="staff-cal-day" class="page" hidden>
+            <div class="toolbar">
+              <button class="btn btn-ghost btn-sm" id="btn-back-month">← 月表示に戻る</button>
+              <span id="selectedDateLabel" style="font-weight:700; font-size:.9rem;"></span>
+            </div>
+            <div class="cal-grid" id="dayGantt"></div>
+            <div class="legend">
+              <div class="item"><span class="swatch" style="background:var(--reef);"></span>確定</div>
+              <div class="item"><span class="swatch" style="background:var(--pending-soft); border:1px dashed var(--pending);"></span>仮予約</div>
+              <div class="item"><span class="swatch" style="background:repeating-linear-gradient(135deg, var(--unavailable-soft), var(--unavailable-soft) 3px, var(--surface-alt) 3px, var(--surface-alt) 6px);"></span>整備・点検</div>
+              <div class="item"><span class="swatch" style="background:var(--surface-alt); border:1px solid var(--line);"></span>空き</div>
+            </div>
+          </section>
+
+          <!-- 予約一覧 -->
+          <section id="staff-list" class="page" hidden>
+            <div class="toolbar">
+              <h2 style="font-size:1.05rem;">予約一覧</h2>
+              <button class="btn btn-staff btn-sm">＋ 手動予約</button>
+            </div>
+            <table class="veh-table">
+              <thead><tr><th>予約番号</th><th>お客様</th><th>車両</th><th>期間</th><th>ステータス</th><th></th></tr></thead>
+              <tbody id="reservation-tbody"></tbody>
+            </table>
+          </section>
+
+          <!-- 予約詳細 -->
+          <section id="staff-detail" class="page" hidden>
+            <button class="btn btn-ghost btn-sm" id="btn-back-list" style="align-self:flex-start;">← 予約一覧に戻る</button>
+            <div class="detail-card" id="detail-card"></div>
+          </section>
+
+          <!-- 車両管理 -->
+          <section id="staff-vehicles" class="page" hidden>
+            <div class="toolbar">
+              <h2 style="font-size:1.05rem;">車両管理</h2>
+              <button class="btn btn-staff btn-sm">＋ 車両を追加</button>
+            </div>
+            <table class="veh-table">
+              <thead><tr><th>車両名</th><th>クラス</th><th>定員</th><th>料金/日</th><th>ステータス</th><th></th></tr></thead>
+              <tbody>
+                <tr><td>ホンダ N-BOX</td><td>軽自動車</td><td>4名</td><td>¥5,500</td><td><span class="pill pill-available">稼働中</span></td><td><button class="btn btn-ghost btn-sm">編集</button></td></tr>
+                <tr><td>ホンダ フィット</td><td>コンパクト</td><td>4名</td><td>¥6,300</td><td><span class="pill pill-available">稼働中</span></td><td><button class="btn btn-ghost btn-sm">編集</button></td></tr>
+                <tr><td>トヨタ カローラ</td><td>普通車</td><td>5名</td><td>¥7,000</td><td><span class="pill pill-available">稼働中</span></td><td><button class="btn btn-ghost btn-sm">編集</button></td></tr>
+                <tr><td>マツダ CX-5</td><td>SUV</td><td>5名</td><td>¥9,800</td><td><span class="pill pill-available">稼働中</span></td><td><button class="btn btn-ghost btn-sm">編集</button></td></tr>
+                <tr><td>トヨタ ハイエース</td><td>ミニバン</td><td>8名</td><td>¥12,000</td><td><span class="pill pill-pending">整備中</span></td><td><button class="btn btn-ghost btn-sm">編集</button></td></tr>
+              </tbody>
+            </table>
+          </section>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="note">
+    実際のリンク遷移で動く動作プロトタイプ。バックエンドはなくブラウザ内のJavaScriptで状態を保持しているだけなので、リロードすると内容はリセットされる。デザインの叩き台は<a href="./" style="color:var(--reef);">画面デザイン案一覧</a>を参照。
+  </footer>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+
+  // ---------------------------------------------------------------
+  // 共通：モード切替（お客様／スタッフ）
+  // ---------------------------------------------------------------
+  document.querySelectorAll('.modetab').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      document.querySelectorAll('.modetab').forEach(function (t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      var target = tab.getAttribute('data-target');
+      document.getElementById('app-customer').hidden = target !== 'app-customer';
+      document.getElementById('app-staff').hidden = target !== 'app-staff';
+    });
+  });
+
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function () { t.classList.remove('show'); }, 1800);
+  }
+
+  function showPage(id) {
+    var target = document.getElementById(id);
+    if (!target) return;
+    Array.prototype.forEach.call(target.parentElement.children, function (el) {
+      if (el.classList && el.classList.contains('page')) el.hidden = true;
+    });
+    target.hidden = false;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ---------------------------------------------------------------
+  // 車両マスタ
+  // ---------------------------------------------------------------
+  var iconKei = '<svg class="car-icon" width="30" height="30" viewBox="0 0 48 48" fill="none"><rect x="6" y="22" width="36" height="12" rx="4" fill="currentColor"/><path d="M12 22l4-9h16l4 9" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="15" cy="35" r="4" fill="currentColor"/><circle cx="33" cy="35" r="4" fill="currentColor"/></svg>';
+  var iconCompact = '<svg class="car-icon" width="30" height="30" viewBox="0 0 48 48" fill="none"><rect x="5" y="22" width="38" height="12" rx="4" fill="currentColor"/><path d="M11 22l3-8h18l3 8" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="14" cy="35" r="4" fill="currentColor"/><circle cx="34" cy="35" r="4" fill="currentColor"/></svg>';
+  var iconSedan = '<svg class="car-icon" width="30" height="30" viewBox="0 0 48 48" fill="none"><rect x="4" y="22" width="40" height="12" rx="4" fill="currentColor"/><path d="M10 22l4-9h20l4 9" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="14" cy="35" r="4" fill="currentColor"/><circle cx="34" cy="35" r="4" fill="currentColor"/></svg>';
+  var iconSuv = '<svg class="car-icon" width="30" height="30" viewBox="0 0 48 48" fill="none"><rect x="5" y="17" width="38" height="17" rx="5" fill="currentColor"/><path d="M10 17l3-7h22l3 7" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="14" cy="35" r="4.5" fill="currentColor"/><circle cx="34" cy="35" r="4.5" fill="currentColor"/></svg>';
+  var iconVan = '<svg class="car-icon" width="30" height="30" viewBox="0 0 48 48" fill="none"><rect x="3" y="20" width="42" height="14" rx="4" fill="currentColor"/><path d="M8 20l4-10h24l4 10" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="13" cy="36" r="4" fill="currentColor"/><circle cx="35" cy="36" r="4" fill="currentColor"/></svg>';
+
+  var vehicles = [
+    { id:'nbox',    name:'ホンダ N-BOX',    cls:'軽自動車', capacity:4, rate:5500,  icon:iconKei,     avail:'available' },
+    { id:'fit',     name:'ホンダ フィット',  cls:'コンパクト', capacity:4, rate:6300,  icon:iconCompact, avail:'available' },
+    { id:'corolla', name:'トヨタ カローラ',  cls:'普通車',   capacity:5, rate:7000,  icon:iconSedan,   avail:'available' },
+    { id:'cx5',     name:'マツダ CX-5',     cls:'SUV',     capacity:5, rate:9800,  icon:iconSuv,     avail:'pending' },
+    { id:'hiace',   name:'トヨタ ハイエース', cls:'ミニバン', capacity:8, rate:12000, icon:iconVan,     avail:'unavailable' }
+  ];
+  var availLabel = { available:'空きあり', pending:'残りわずか', unavailable:'満車' };
+
+  // 01トップ：車種ラインナップ プレビュー（区分ごとの代表車両で表示、価格は「〜」付き）
+  var lineupEl = document.getElementById('lineup-preview');
+  vehicles.forEach(function (v) {
+    var card = document.createElement('div');
+    card.className = 'veh-card';
+    card.style.marginBottom = '10px';
+    card.innerHTML =
+      '<div class="icon-wrap">' + v.icon + '</div>' +
+      '<div class="veh-main"><div class="name">' + v.cls + '</div><div class="spec">定員' + v.capacity + '名まで</div></div>' +
+      '<div class="veh-price"><div class="amount">¥' + v.rate.toLocaleString() + '〜</div><div class="unit">/ 日</div></div>';
+    lineupEl.appendChild(card);
+  });
+
+  // ---------------------------------------------------------------
+  // 顧客フロー
+  // ---------------------------------------------------------------
+  var booking = { vehicle: null };
+
+  document.getElementById('btn-search').addEventListener('click', function () {
+    var pickupDate = document.getElementById('f-pickup-date').value;
+    var returnDate = document.getElementById('f-return-date').value;
+    var err = document.getElementById('top-err');
+    if (!pickupDate || !returnDate) { err.textContent = '貸出日・返却日を入力してください。'; return; }
+    if (new Date(returnDate) <= new Date(pickupDate)) { err.textContent = '返却日は貸出日より後にしてください。'; return; }
+    err.textContent = '';
+
+    var loc = document.getElementById('f-pickup-loc').value;
+    var pTime = document.getElementById('f-pickup-time').value;
+    var rTime = document.getElementById('f-return-time').value;
+    var pd = new Date(pickupDate), rd = new Date(returnDate);
+    var summary = pd.getMonth()+1 + '/' + pd.getDate() + ' ' + pTime + ' 〜 ' + (rd.getMonth()+1) + '/' + rd.getDate() + ' ' + rTime + '・' + loc;
+    document.getElementById('search-summary').textContent = summary;
+
+    renderVehicleList();
+    showPage('cust-list');
+  });
+
+  function renderVehicleList() {
+    var wrap = document.getElementById('veh-list');
+    wrap.innerHTML = '';
+    vehicles.forEach(function (v) {
+      var disabled = v.avail === 'unavailable';
+      var card = document.createElement('div');
+      card.className = 'veh-card' + (disabled ? '' : ' selectable');
+      card.style.marginBottom = '10px';
+      if (disabled) card.style.opacity = '.55';
+      card.innerHTML =
+        '<div class="icon-wrap"' + (disabled ? ' style="background:var(--surface-alt); color:var(--ink-soft);"' : '') + '>' + v.icon + '</div>' +
+        '<div class="veh-main"><div class="name">' + v.name + '</div><div class="spec">' + v.cls + '・' + v.capacity + '名・AT</div>' +
+        '<span class="pill pill-' + v.avail + '" style="margin-top:6px;">' + availLabel[v.avail] + '</span></div>' +
+        '<div class="veh-price"><div class="amount">¥' + v.rate.toLocaleString() + '</div><div class="unit">/ 日</div></div>';
+      if (!disabled) {
+        card.addEventListener('click', function () { selectVehicle(v); });
+      }
+      wrap.appendChild(card);
+    });
+    var btn = document.createElement('button');
+    btn.className = 'btn btn-primary btn-block';
+    btn.textContent = '車両をタップして選択してください';
+    btn.disabled = true;
+    btn.id = 'btn-goto-form';
+    wrap.appendChild(btn);
+  }
+
+  function selectVehicle(v) {
+    booking.vehicle = v;
+    var btn = document.getElementById('btn-goto-form');
+    btn.disabled = false;
+    btn.textContent = v.name + 'を選択して次へ';
+    btn.onclick = function () {
+      renderFormSummary();
+      showPage('cust-form');
+    };
+    showToast(v.name + 'を選択しました');
+  }
+
+  document.getElementById('btn-back-top').addEventListener('click', function () {
+    showPage('cust-top');
+  });
+
+  function nights() {
+    var pd = new Date(document.getElementById('f-pickup-date').value);
+    var rd = new Date(document.getElementById('f-return-date').value);
+    var n = Math.round((rd - pd) / 86400000);
+    return n > 0 ? n : 1;
+  }
+
+  function renderFormSummary() {
+    var v = booking.vehicle;
+    var pickupDate = document.getElementById('f-pickup-date').value;
+    var returnDate = document.getElementById('f-return-date').value;
+    var pTime = document.getElementById('f-pickup-time').value;
+    var rTime = document.getElementById('f-return-time').value;
+    var pd = new Date(pickupDate), rd = new Date(returnDate);
+    var dateStr = (pd.getMonth()+1) + '/' + pd.getDate() + ' ' + pTime + ' 〜 ' + (rd.getMonth()+1) + '/' + rd.getDate() + ' ' + rTime;
+    document.getElementById('form-summary').innerHTML =
+      '<div class="icon-wrap">' + v.icon + '</div>' +
+      '<div><div style="font-size:.86rem; font-weight:700;">' + v.name + '</div><div class="meta">' + dateStr + '・¥' + v.rate.toLocaleString() + '/日</div></div>';
+  }
+
+  document.getElementById('btn-submit-form').addEventListener('click', function () {
+    var name = document.getElementById('f-name').value.trim();
+    var phone = document.getElementById('f-phone').value.trim();
+    var email = document.getElementById('f-email').value.trim();
+    var agree = document.getElementById('f-agree').checked;
+    var err = document.getElementById('form-err');
+    if (!name || !phone) { err.textContent = 'お名前と電話番号を入力してください。'; return; }
+    if (!agree) { err.textContent = '予約規定への同意が必要です。'; return; }
+    err.textContent = '';
+
+    var v = booking.vehicle;
+    var n = nights();
+    var total = v.rate * n;
+    var pickupDate = document.getElementById('f-pickup-date').value;
+    var code = 'SR-' + pickupDate.replace(/-/g,'') + '-' + String(Math.floor(Math.random()*900)+100);
+
+    var pTime = document.getElementById('f-pickup-time').value;
+    var rTime = document.getElementById('f-return-time').value;
+    var pd = new Date(pickupDate), rd = new Date(document.getElementById('f-return-date').value);
+    var loc = document.getElementById('f-pickup-loc').value;
+
+    document.getElementById('complete-code').textContent = code;
+    document.getElementById('complete-receipt').innerHTML =
+      '<div class="row"><span>車両</span><span>' + v.name + '</span></div>' +
+      '<div class="row"><span>期間</span><span>' + (pd.getMonth()+1) + '/' + pd.getDate() + ' ' + pTime + ' 〜 ' + (rd.getMonth()+1) + '/' + rd.getDate() + '（' + n + '泊）</span></div>' +
+      '<div class="row"><span>拠点</span><span>' + loc + '</span></div>' +
+      '<hr class="divider">' +
+      '<div class="row"><span>お支払い目安</span><span>¥' + total.toLocaleString() + '</span></div>';
+
+    showPage('cust-complete');
+  });
+
+  document.getElementById('btn-new-booking').addEventListener('click', function () {
+    booking.vehicle = null;
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-phone').value = '';
+    document.getElementById('f-email').value = '';
+    showPage('cust-top');
+  });
+
+  // ---------------------------------------------------------------
+  // スタッフフロー：ログイン
+  // ---------------------------------------------------------------
+  document.getElementById('btn-login').addEventListener('click', function () {
+    var email = document.getElementById('s-email').value.trim();
+    var pass = document.getElementById('s-pass').value.trim();
+    var err = document.getElementById('login-err');
+    if (!email || !pass) { err.textContent = 'メールアドレスとパスワードを入力してください。'; return; }
+    err.textContent = '';
+    document.getElementById('staff-login-wrap').hidden = true;
+    document.getElementById('staff-shell').hidden = false;
+    setStaffNav('staff-cal-month');
+  });
+
+  document.getElementById('btn-logout').addEventListener('click', function () {
+    document.getElementById('staff-shell').hidden = true;
+    document.getElementById('staff-login-wrap').hidden = false;
+    document.getElementById('s-email').value = '';
+    document.getElementById('s-pass').value = '';
+  });
+
+  // ---------------------------------------------------------------
+  // スタッフフロー：上部ナビ
+  // ---------------------------------------------------------------
+  var pathMap = {
+    'staff-cal-month': 'staff.island-rentacar.example/calendar',
+    'staff-cal-day': 'staff.island-rentacar.example/calendar/2026-08-12',
+    'staff-list': 'staff.island-rentacar.example/reservations',
+    'staff-detail': 'staff.island-rentacar.example/reservations/detail',
+    'staff-vehicles': 'staff.island-rentacar.example/vehicles'
+  };
+
+  function setStaffNav(pageId) {
+    document.querySelectorAll('.staffnav button[data-nav]').forEach(function (b) {
+      var navKey = pageId === 'staff-cal-day' ? 'staff-cal-month' : pageId;
+      b.classList.toggle('active', b.getAttribute('data-nav') === navKey);
+    });
+    document.getElementById('staff-path').textContent = pathMap[pageId] || pathMap['staff-cal-month'];
+    showPage(pageId);
+    if (pageId === 'staff-list') renderReservationTable();
+  }
+
+  document.querySelectorAll('.staffnav button[data-nav]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var target = btn.getAttribute('data-nav');
+      if (target === 'staff-cal-month') buildMonthGrid();
+      setStaffNav(target);
+    });
+  });
+
+  // ---------------------------------------------------------------
+  // スタッフフロー：月表示カレンダー → 日別ガント
+  // ---------------------------------------------------------------
+  var weekdays = ['日','月','火','水','木','金','土'];
+  var busyCounts = { 11: 1, 12: 2, 13: 2, 14: 3, 15: 3, 16: 1 };
+
+  var dayGanttData = {
+    busy: [
+      { name:'N-BOX',   cells:[['',1],['confirmed 石垣 太郎',2],['',1],['',1],['',1]] },
+      { name:'フィット', cells:[['',1],['',1],['',1],['confirmed 鈴木 次郎',2],['',1]] },
+      { name:'カローラ', cells:[['pending 仮',1],['',1],['confirmed 山田 花子',2],['',1],['',1]] },
+      { name:'CX-5',    cells:[['',1],['',1],['',1],['pending 仮',1],['confirmed 田中 一郎',2]] },
+      { name:'ハイエース', cells:[['blocked',1],['blocked',1],['confirmed 団体旅行 8名',3],['',1]] }
+    ],
+    quiet: [
+      { name:'N-BOX',   cells:[['',6]] },
+      { name:'フィット', cells:[['',6]] },
+      { name:'カローラ', cells:[['pending 仮',1],['',5]] },
+      { name:'CX-5',    cells:[['',6]] },
+      { name:'ハイエース', cells:[['',6]] }
+    ]
+  };
+
+  function buildMonthGrid() {
+    var grid = document.getElementById('monthGrid');
+    grid.querySelectorAll('.day-cell').forEach(function (c) { c.remove(); });
+    var leadingBlanks = 6; // 2026年8月1日は土曜日
+    for (var i = 0; i < leadingBlanks; i++) {
+      var b = document.createElement('div');
+      b.className = 'day-cell empty';
+      grid.appendChild(b);
+    }
+    for (var d = 1; d <= 31; d++) {
+      var count = busyCounts[d];
+      var cell = document.createElement('div');
+      cell.className = 'day-cell' + (count ? ' busy' : '');
+      cell.innerHTML = '<span class="dnum">' + d + '</span>' + (count ? '<span class="dcount">' + count + '件</span>' : '');
+      cell.addEventListener('click', function (day, busy) {
+        return function () { openDayGantt(day, busy); };
+      }(d, !!count));
+      grid.appendChild(cell);
+    }
+    for (var j = 0; j < 5; j++) {
+      var t = document.createElement('div');
+      t.className = 'day-cell empty';
+      grid.appendChild(t);
+    }
+  }
+
+  function renderGanttCell(spec) {
+    var parts = spec[0].split(' ');
+    var state = parts[0];
+    var label = parts.slice(1).join(' ');
+    var span = spec[1];
+    if (!state) return '<div class="cal-cell" style="grid-column: span ' + span + ';"></div>';
+    if (state === 'blocked') return '<div class="cal-cell blocked" style="grid-column: span ' + span + ';"></div>';
+    if (state === 'pending') return '<div class="cal-cell pending" style="grid-column: span ' + span + ';">' + label + '</div>';
+    return '<div class="cal-cell confirmed" style="grid-column: span ' + span + ';">' + label + '</div>';
+  }
+
+  function openDayGantt(day, busy) {
+    var wd = weekdays[(day + 5) % 7];
+    document.getElementById('selectedDateLabel').textContent = '2026年8月' + day + '日（' + wd + '）';
+    var data = busy ? dayGanttData.busy : dayGanttData.quiet;
+    var html = '<div></div><div class="hdr">8:00</div><div class="hdr">10:00</div><div class="hdr">12:00</div><div class="hdr">14:00</div><div class="hdr">16:00</div><div class="hdr">18:00</div>';
+    data.forEach(function (row) {
+      html += '<div class="veh-name">' + row.name + '</div>';
+      row.cells.forEach(function (c) { html += renderGanttCell(c); });
+    });
+    document.getElementById('dayGantt').innerHTML = html;
+    setStaffNav('staff-cal-day');
+  }
+
+  document.getElementById('btn-back-month').addEventListener('click', function () {
+    setStaffNav('staff-cal-month');
+  });
+
+  // ---------------------------------------------------------------
+  // スタッフフロー：予約一覧 → 予約詳細
+  // ---------------------------------------------------------------
+  var reservations = [
+    { id:'SR-20260812-047', name:'石垣 太郎',      vehicle:'ホンダ N-BOX',   pickup:'2026/08/12 10:00', ret:'2026/08/14 10:00', loc:'離島ターミナル店', phone:'090-0000-0000', email:'taro@example.com',    notes:'チャイルドシート1台希望', status:'pending' },
+    { id:'SR-20260814-048', name:'鈴木 次郎',      vehicle:'ホンダ フィット', pickup:'2026/08/14 10:00', ret:'2026/08/16 10:00', loc:'新石垣空港店',     phone:'080-1111-2222', email:'jiro@example.com',    notes:'', status:'confirmed' },
+    { id:'SR-20260811-046', name:'浦崎 実',        vehicle:'トヨタ カローラ', pickup:'2026/08/11 9:00',  ret:'2026/08/11 18:00', loc:'離島ターミナル店', phone:'090-3333-4444', email:'urazaki@example.com', notes:'日帰り利用', status:'pending' },
+    { id:'SR-20260814-050', name:'山田 花子',      vehicle:'トヨタ カローラ', pickup:'2026/08/14 10:00', ret:'2026/08/16 10:00', loc:'離島ターミナル店', phone:'090-5555-6666', email:'hanako@example.com',  notes:'', status:'confirmed' },
+    { id:'SR-20260812-051', name:'団体旅行(8名)',   vehicle:'トヨタ ハイエース', pickup:'2026/08/12 9:00',  ret:'2026/08/15 18:00', loc:'新石垣空港店',     phone:'070-7777-8888', email:'group@example.com',   notes:'団体旅行、空港出迎え希望', status:'confirmed' },
+    { id:'SR-20260816-052', name:'田中 一郎',      vehicle:'マツダ CX-5',    pickup:'2026/08/16 10:00', ret:'2026/08/18 10:00', loc:'新石垣空港店',     phone:'090-9999-0000', email:'tanaka@example.com',  notes:'', status:'pending' }
+  ];
+  var statusLabel = { pending:'仮予約', confirmed:'確定', cancelled:'キャンセル' };
+  var statusPill  = { pending:'pending', confirmed:'available', cancelled:'unavailable' };
+
+  function renderReservationTable() {
+    var tbody = document.getElementById('reservation-tbody');
+    tbody.innerHTML = '';
+    reservations.forEach(function (r, idx) {
+      var tr = document.createElement('tr');
+      tr.className = 'clickable';
+      tr.innerHTML =
+        '<td>' + r.id + '</td><td>' + r.name + '</td><td>' + r.vehicle.replace(/^\S+\s/, '') + '</td>' +
+        '<td>' + r.pickup.slice(5,10).replace('-','/').replace(/^0/,'') + '〜' + r.ret.slice(5,10).replace('-','/').replace(/^0/,'') + '</td>' +
+        '<td><span class="pill pill-' + statusPill[r.status] + '">' + statusLabel[r.status] + '</span></td>' +
+        '<td><button class="btn btn-ghost btn-sm">詳細を見る</button></td>';
+      tr.addEventListener('click', function () { openDetail(idx); });
+      tbody.appendChild(tr);
+    });
+  }
+
+  function openDetail(idx) {
+    var r = reservations[idx];
+    var card = document.getElementById('detail-card');
+    function renderCard() {
+      card.innerHTML =
+        '<div class="detail-head"><div><div class="id">' + r.id + '</div><h2 style="font-size:1.1rem; margin-top:4px;">' + r.name + ' 様</h2></div>' +
+        '<span class="pill pill-' + statusPill[r.status] + '">' + statusLabel[r.status] + '</span></div>' +
+        '<hr class="divider">' +
+        '<div class="kv-grid">' +
+        '<div><div class="k">車両</div><div class="v">' + r.vehicle + '</div></div>' +
+        '<div><div class="k">拠点</div><div class="v">' + r.loc + '</div></div>' +
+        '<div><div class="k">貸出</div><div class="v">' + r.pickup + '</div></div>' +
+        '<div><div class="k">返却</div><div class="v">' + r.ret + '</div></div>' +
+        '<div><div class="k">電話番号</div><div class="v">' + r.phone + '</div></div>' +
+        '<div><div class="k">メール</div><div class="v">' + r.email + '</div></div>' +
+        '<div class="full"><div class="k">備考</div><div class="v" style="font-weight:400;">' + (r.notes || 'なし') + '</div></div>' +
+        '</div>' +
+        '<div class="detail-actions">' +
+        '<button class="btn btn-staff" id="btn-confirm-res"' + (r.status === 'confirmed' ? ' disabled' : '') + '>予約を確定する</button>' +
+        '<button class="btn btn-ghost" id="btn-cancel-res"' + (r.status === 'cancelled' ? ' disabled' : '') + '>キャンセル</button>' +
+        '</div>';
+      document.getElementById('btn-confirm-res').addEventListener('click', function () {
+        r.status = 'confirmed'; renderCard(); showToast(r.id + ' を確定にしました');
+      });
+      document.getElementById('btn-cancel-res').addEventListener('click', function () {
+        r.status = 'cancelled'; renderCard(); showToast(r.id + ' をキャンセルにしました');
+      });
+    }
+    renderCard();
+    setStaffNav('staff-detail');
+  }
+
+  document.getElementById('btn-back-list').addEventListener('click', function () {
+    setStaffNav('staff-list');
+    renderReservationTable();
+  });
+
+  // 初期化
+  buildMonthGrid();
+
+})();
+</script>
