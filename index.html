@@ -334,6 +334,22 @@
   }
   .cal-grid .hdr { color: var(--ink-soft); text-align:center; padding: 4px 0; font-variant-numeric: tabular-nums; }
   .cal-grid .veh-name { display:flex; align-items:center; font-weight: 700; font-size: .74rem; }
+
+  /* ---- month calendar (staff S2 landing view) ---- */
+  .month-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 4px; }
+  .month-cal-grid .wd { text-align:center; font-size:.7rem; color: var(--ink-soft); padding: 2px 0 6px; }
+  .day-cell {
+    aspect-ratio: 1.15; border-radius: 9px; background: var(--surface-alt);
+    border: 1px solid transparent; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    transition: border-color .12s ease;
+  }
+  .day-cell:hover { border-color: var(--reef); }
+  .day-cell .dnum { font-size: .82rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .day-cell .dcount { font-size: .6rem; font-weight: 700; color: var(--reef); }
+  .day-cell.busy { background: var(--reef-soft); }
+  .day-cell.empty { background: transparent; cursor: default; pointer-events: none; }
+  .cal-view[hidden], .cal-grid[hidden] { display: none; }
   .cal-cell { border-radius: 7px; min-height: 30px; background: var(--surface-alt); }
   .cal-cell.confirmed { background: var(--reef); color:#06211F; display:flex; align-items:center; justify-content:center; font-weight:700; }
   .cal-cell.pending { background: var(--pending-soft); border: 1px dashed var(--pending); display:flex; align-items:center; justify-content:center; color:var(--pending); font-weight:700; }
@@ -653,54 +669,93 @@
       <div class="desktop-frame">
         <div class="desktop-titlebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="path">staff.island-rentacar.example/calendar</span></div>
         <div class="desktop-body">
-          <div class="toolbar">
-            <div class="month-nav"><button>◀</button><span>2026年8月11日〜16日</span><button>▶</button></div>
-            <button class="btn btn-staff btn-sm">＋ 手動予約</button>
+
+          <!-- 月表示（最初に出てくるビュー） -->
+          <div class="cal-view" id="monthView">
+            <div class="toolbar">
+              <div class="month-nav"><button>◀</button><span>2026年8月</span><button>▶</button></div>
+              <button class="btn btn-staff btn-sm">＋ 手動予約</button>
+            </div>
+            <div class="month-cal-grid" id="monthGrid">
+              <div class="wd">日</div><div class="wd">月</div><div class="wd">火</div><div class="wd">水</div><div class="wd">木</div><div class="wd">金</div><div class="wd">土</div>
+              <!-- JSで日付セルを生成 -->
+            </div>
+            <div style="font-size:.7rem; color:var(--ink-soft); text-align:center; margin-top:2px;">日付をクリックすると、その日のガントチャートを表示します</div>
           </div>
 
-          <div class="cal-grid">
-            <div></div>
-            <div class="hdr">11(火)</div><div class="hdr">12(水)</div><div class="hdr">13(木)</div><div class="hdr">14(金)</div><div class="hdr">15(土)</div><div class="hdr">16(日)</div>
+          <!-- 日別ガントチャート（日付クリックで表示） -->
+          <div class="cal-view" id="dayView" hidden>
+            <div class="toolbar">
+              <button class="btn btn-ghost btn-sm" id="backToMonth">← 月表示に戻る</button>
+              <span id="selectedDateLabel" style="font-weight:700; font-size:.9rem;"></span>
+            </div>
 
-            <div class="veh-name">N-BOX</div>
-            <div class="cal-cell"></div>
-            <div class="cal-cell confirmed" style="grid-column: span 2;">石垣 太郎</div>
-            <div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div>
+            <div class="cal-grid" id="dayGanttBusy" hidden>
+              <div></div>
+              <div class="hdr">8:00</div><div class="hdr">10:00</div><div class="hdr">12:00</div><div class="hdr">14:00</div><div class="hdr">16:00</div><div class="hdr">18:00</div>
 
-            <div class="veh-name">フィット</div>
-            <div class="cal-cell"></div><div class="cal-cell"></div>
-            <div class="cal-cell confirmed" style="grid-column: span 2;">鈴木 次郎</div>
-            <div class="cal-cell"></div><div class="cal-cell"></div>
+              <div class="veh-name">N-BOX</div>
+              <div class="cal-cell"></div>
+              <div class="cal-cell confirmed" style="grid-column: span 2;">石垣 太郎</div>
+              <div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div>
 
-            <div class="veh-name">カローラ</div>
-            <div class="cal-cell pending">仮</div>
-            <div class="cal-cell"></div><div class="cal-cell"></div>
-            <div class="cal-cell confirmed" style="grid-column: span 2;">山田 花子</div>
-            <div class="cal-cell"></div>
+              <div class="veh-name">フィット</div>
+              <div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div>
+              <div class="cal-cell confirmed" style="grid-column: span 2;">鈴木 次郎</div>
+              <div class="cal-cell"></div>
 
-            <div class="veh-name">CX-5</div>
-            <div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div>
-            <div class="cal-cell pending">仮</div>
-            <div class="cal-cell confirmed" style="grid-column: span 2;">田中 一郎</div>
+              <div class="veh-name">カローラ</div>
+              <div class="cal-cell pending">仮</div>
+              <div class="cal-cell"></div>
+              <div class="cal-cell confirmed" style="grid-column: span 2;">山田 花子</div>
+              <div class="cal-cell"></div><div class="cal-cell"></div>
 
-            <div class="veh-name">ハイエース</div>
-            <div class="cal-cell blocked"></div><div class="cal-cell blocked"></div>
-            <div class="cal-cell confirmed" style="grid-column: span 3;">団体旅行 8名</div>
-            <div class="cal-cell"></div>
+              <div class="veh-name">CX-5</div>
+              <div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div>
+              <div class="cal-cell pending">仮</div>
+              <div class="cal-cell confirmed" style="grid-column: span 2;">田中 一郎</div>
+
+              <div class="veh-name">ハイエース</div>
+              <div class="cal-cell blocked"></div><div class="cal-cell blocked"></div>
+              <div class="cal-cell confirmed" style="grid-column: span 3;">団体旅行 8名</div>
+              <div class="cal-cell"></div>
+            </div>
+
+            <div class="cal-grid" id="dayGanttQuiet" hidden>
+              <div></div>
+              <div class="hdr">8:00</div><div class="hdr">10:00</div><div class="hdr">12:00</div><div class="hdr">14:00</div><div class="hdr">16:00</div><div class="hdr">18:00</div>
+
+              <div class="veh-name">N-BOX</div>
+              <div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div>
+
+              <div class="veh-name">フィット</div>
+              <div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div>
+
+              <div class="veh-name">カローラ</div>
+              <div class="cal-cell pending">仮</div>
+              <div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div>
+
+              <div class="veh-name">CX-5</div>
+              <div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div>
+
+              <div class="veh-name">ハイエース</div>
+              <div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div>
+            </div>
+
+            <div class="legend">
+              <div class="item"><span class="swatch" style="background:var(--reef);"></span>確定</div>
+              <div class="item"><span class="swatch" style="background:var(--pending-soft); border:1px dashed var(--pending);"></span>仮予約</div>
+              <div class="item"><span class="swatch" style="background:repeating-linear-gradient(135deg, var(--unavailable-soft), var(--unavailable-soft) 3px, var(--surface-alt) 3px, var(--surface-alt) 6px);"></span>整備・点検</div>
+              <div class="item"><span class="swatch" style="background:var(--surface-alt); border:1px solid var(--line);"></span>空き</div>
+            </div>
           </div>
 
-          <div class="legend">
-            <div class="item"><span class="swatch" style="background:var(--reef);"></span>確定</div>
-            <div class="item"><span class="swatch" style="background:var(--pending-soft); border:1px dashed var(--pending);"></span>仮予約</div>
-            <div class="item"><span class="swatch" style="background:repeating-linear-gradient(135deg, var(--unavailable-soft), var(--unavailable-soft) 3px, var(--surface-alt) 3px, var(--surface-alt) 6px);"></span>整備・点検</div>
-            <div class="item"><span class="swatch" style="background:var(--surface-alt); border:1px solid var(--line);"></span>空き</div>
-          </div>
         </div>
       </div>
       <div class="frame-caption">
         <div class="no">02 — スタッフ向け</div>
         <h3>予約カレンダー</h3>
-        <p>車両×日付のガントチャート表示。お客様向け画面と同じ5車種(N-BOX・フィット・カローラ・CX-5・ハイエース)を並べ、お客様の仮予約はSupabase Realtimeでここに即時反映される。</p>
+        <p>最初は普通の月表示カレンダーが出てくる。日付をクリックすると、その日の車両×時間帯のガントチャートに切り替わる（お客様向け画面と同じ5車種を表示、Supabase Realtimeで即時反映）。</p>
       </div>
     </div>
 
@@ -782,4 +837,53 @@
       document.getElementById('staff').hidden = target !== 'staff';
     });
   });
+
+  // ---- S2: 月表示カレンダー ----
+  (function () {
+    var monthGrid = document.getElementById('monthGrid');
+    if (!monthGrid) return;
+
+    var weekdays = ['日','月','火','水','木','金','土'];
+    var leadingBlanks = 6; // 2026年8月1日は土曜日
+    var daysInMonth = 31;
+    var busyCounts = { 11: 1, 12: 2, 13: 2, 14: 3, 15: 3, 16: 1 };
+
+    for (var i = 0; i < leadingBlanks; i++) {
+      var blank = document.createElement('div');
+      blank.className = 'day-cell empty';
+      monthGrid.appendChild(blank);
+    }
+    for (var d = 1; d <= daysInMonth; d++) {
+      var cell = document.createElement('div');
+      var count = busyCounts[d];
+      cell.className = 'day-cell' + (count ? ' busy' : '');
+      cell.setAttribute('data-day', d);
+      cell.innerHTML = '<span class="dnum">' + d + '</span>' + (count ? '<span class="dcount">' + count + '件</span>' : '');
+      monthGrid.appendChild(cell);
+    }
+
+    var monthView = document.getElementById('monthView');
+    var dayView = document.getElementById('dayView');
+    var dateLabel = document.getElementById('selectedDateLabel');
+    var ganttBusy = document.getElementById('dayGanttBusy');
+    var ganttQuiet = document.getElementById('dayGanttQuiet');
+
+    monthGrid.addEventListener('click', function (e) {
+      var cell = e.target.closest('.day-cell[data-day]');
+      if (!cell) return;
+      var day = parseInt(cell.getAttribute('data-day'), 10);
+      var wd = weekdays[(day + 5) % 7]; // 2026年8月1日(土)を基準に曜日を算出
+      dateLabel.textContent = '2026年8月' + day + '日(' + wd + ')';
+      var busy = !!busyCounts[day];
+      ganttBusy.hidden = !busy;
+      ganttQuiet.hidden = busy;
+      monthView.hidden = true;
+      dayView.hidden = false;
+    });
+
+    document.getElementById('backToMonth').addEventListener('click', function () {
+      dayView.hidden = true;
+      monthView.hidden = false;
+    });
+  })();
 </script>
