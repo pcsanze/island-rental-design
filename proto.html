@@ -102,9 +102,12 @@
   .app-top .mark { font-family: var(--font-display); font-size: .66rem; letter-spacing: .12em; font-weight: 700; color: var(--reef); text-transform: uppercase; }
   .field-label { font-size: .74rem; font-weight: 600; color: var(--ink-soft); margin-bottom: 6px; display: block; }
   .field { width: 100%; padding: 11px 13px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-alt); color: var(--ink); font-size: .88rem; }
-  .field-row { display: flex; gap: 10px; }
+  .field-row { display: flex; gap: 8px; }
   .field-row > div { flex: 1; min-width: 0; }
+  .field-row .field-col-date { flex: 1.6; }
+  .field-row .field-col-time { flex: 1; }
   .field-row input[type="date"], .field-row select { min-width: 0; width: 100%; }
+  .field-row input[type="date"] { padding-left: 8px; padding-right: 4px; font-size: .8rem; }
   .btn { border-radius: 11px; padding: 13px 18px; font-size: .9rem; font-weight: 700; border: none; text-align: center; }
   .btn-primary { background: var(--coral); color: #FFF6F2; }
   .btn-staff { background: var(--reef); color: #06211F; }
@@ -239,7 +242,8 @@
 
     header.topbar { flex-direction: column; align-items: stretch; gap: 10px; padding: 12px 16px; }
     .modetabs { width: 100%; }
-    .field-row { flex-direction: column; gap: 16px; }
+    .phone-body { padding: 10px 12px 30px; }
+    .field-row { gap: 6px; }
     .modetab { flex: 1; font-size: .76rem; padding: 8px 4px; text-align: center; }
   }
 </style>
@@ -273,12 +277,12 @@
             </select>
           </div>
           <div class="field-row">
-            <div><span class="field-label">貸出日</span><input class="field" type="date" id="f-pickup-date" value="2026-08-12"></div>
-            <div><span class="field-label">時間</span><select class="field" id="f-pickup-time"><option>10:00</option><option>9:00</option><option>14:00</option></select></div>
+            <div class="field-col-date"><span class="field-label">貸出日</span><input class="field" type="date" id="f-pickup-date" value="2026-08-12"></div>
+            <div class="field-col-time"><span class="field-label">時間</span><select class="field" id="f-pickup-time"><option>10:00</option><option>9:00</option><option>14:00</option></select></div>
           </div>
           <div class="field-row">
-            <div><span class="field-label">返却日</span><input class="field" type="date" id="f-return-date" value="2026-08-14"></div>
-            <div><span class="field-label">時間</span><select class="field" id="f-return-time"><option>10:00</option><option>9:00</option><option>18:00</option></select></div>
+            <div class="field-col-date"><span class="field-label">返却日</span><input class="field" type="date" id="f-return-date" value="2026-08-14"></div>
+            <div class="field-col-time"><span class="field-label">時間</span><select class="field" id="f-return-time"><option>10:00</option><option>9:00</option><option>18:00</option></select></div>
           </div>
           <div>
             <span class="field-label">返却店舗</span>
