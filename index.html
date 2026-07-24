@@ -176,10 +176,6 @@
   .perk-grid .perk .ico { color: var(--reef); margin-bottom: 4px; display:flex; justify-content:center; }
   .perk-grid .perk .label { font-size: .66rem; font-weight: 700; line-height: 1.3; }
 
-  .class-strip { display:flex; gap:8px; overflow-x:auto; padding-bottom: 2px; flex-shrink: 0; min-height: 64px; }
-  .class-chip { flex:0 0 auto; padding:9px 13px; border-radius:10px; background:var(--surface-alt); border:1px solid var(--line); font-size:.72rem; text-align:center; min-width:78px; }
-  .class-chip .cname { font-weight:700; }
-  .class-chip .cprice { color:var(--ink-soft); margin-top:2px; font-variant-numeric: tabular-nums; }
   .scroll-hint { text-align:center; font-size:.66rem; color: var(--ink-soft); }
 
   .mini-footer {
@@ -425,12 +421,45 @@
           <div class="scroll-hint">▾ スクロールで続きを見る</div>
 
           <div class="mini-label">車種ラインナップ</div>
-          <div class="class-strip">
-            <div class="class-chip"><div class="cname">軽自動車</div><div class="cprice">¥5,500〜</div></div>
-            <div class="class-chip"><div class="cname">コンパクト</div><div class="cprice">¥6,300〜</div></div>
-            <div class="class-chip"><div class="cname">普通車</div><div class="cprice">¥7,000〜</div></div>
-            <div class="class-chip"><div class="cname">SUV</div><div class="cprice">¥9,800〜</div></div>
-            <div class="class-chip"><div class="cname">ミニバン</div><div class="cprice">¥12,000〜</div></div>
+
+          <div class="veh-card">
+            <div class="icon-wrap">
+              <svg class="car-icon" width="28" height="28" viewBox="0 0 48 48" fill="none"><rect x="6" y="22" width="36" height="12" rx="4" fill="currentColor"/><path d="M12 22l4-9h16l4 9" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="15" cy="35" r="4" fill="currentColor"/><circle cx="33" cy="35" r="4" fill="currentColor"/></svg>
+            </div>
+            <div class="veh-main"><div class="name">軽自動車</div><div class="spec">小回り重視・4名まで</div></div>
+            <div class="veh-price"><div class="amount">¥5,500〜</div><div class="unit">/ 日</div></div>
+          </div>
+
+          <div class="veh-card">
+            <div class="icon-wrap">
+              <svg class="car-icon" width="28" height="28" viewBox="0 0 48 48" fill="none"><rect x="5" y="22" width="38" height="12" rx="4" fill="currentColor"/><path d="M11 22l3-8h18l3 8" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="14" cy="35" r="4" fill="currentColor"/><circle cx="34" cy="35" r="4" fill="currentColor"/></svg>
+            </div>
+            <div class="veh-main"><div class="name">コンパクト</div><div class="spec">扱いやすいサイズ・4〜5名</div></div>
+            <div class="veh-price"><div class="amount">¥6,300〜</div><div class="unit">/ 日</div></div>
+          </div>
+
+          <div class="veh-card">
+            <div class="icon-wrap">
+              <svg class="car-icon" width="28" height="28" viewBox="0 0 48 48" fill="none"><rect x="4" y="22" width="40" height="12" rx="4" fill="currentColor"/><path d="M10 22l4-9h20l4 9" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="14" cy="35" r="4" fill="currentColor"/><circle cx="34" cy="35" r="4" fill="currentColor"/></svg>
+            </div>
+            <div class="veh-main"><div class="name">普通車</div><div class="spec">ゆったり快適・5名</div></div>
+            <div class="veh-price"><div class="amount">¥7,000〜</div><div class="unit">/ 日</div></div>
+          </div>
+
+          <div class="veh-card">
+            <div class="icon-wrap">
+              <svg class="car-icon" width="28" height="28" viewBox="0 0 48 48" fill="none"><rect x="5" y="17" width="38" height="17" rx="5" fill="currentColor"/><path d="M10 17l3-7h22l3 7" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="14" cy="35" r="4.5" fill="currentColor"/><circle cx="34" cy="35" r="4.5" fill="currentColor"/></svg>
+            </div>
+            <div class="veh-main"><div class="name">SUV</div><div class="spec">石垣の自然を満喫・5名</div></div>
+            <div class="veh-price"><div class="amount">¥9,800〜</div><div class="unit">/ 日</div></div>
+          </div>
+
+          <div class="veh-card">
+            <div class="icon-wrap">
+              <svg class="car-icon" width="28" height="28" viewBox="0 0 48 48" fill="none"><rect x="3" y="20" width="42" height="14" rx="4" fill="currentColor"/><path d="M8 20l4-10h24l4 10" stroke="currentColor" stroke-width="3" fill="none"/><circle cx="13" cy="36" r="4" fill="currentColor"/><circle cx="35" cy="36" r="4" fill="currentColor"/></svg>
+            </div>
+            <div class="veh-main"><div class="name">ミニバン</div><div class="spec">グループ・団体向け・8名</div></div>
+            <div class="veh-price"><div class="amount">¥12,000〜</div><div class="unit">/ 日</div></div>
           </div>
 
           <div class="mini-label">選ばれるポイント</div>
@@ -459,7 +488,7 @@
       <div class="frame-caption">
         <div class="no">01 — お客様向け</div>
         <h3>トップ（日程・拠点選択）</h3>
-        <p>電話での在庫確認をこの画面に置き換える起点。拠点・日時を先に固定してから空き車両を絞り込む。フォームの下に車種ラインナップ→選ばれるポイント→フッターの順で補足情報を配置し、トヨタ・タイムズと同じ「フォーム優先＋下にスクロールで補足情報」という構成に揃えた。</p>
+        <p>電話での在庫確認をこの画面に置き換える起点。拠点・日時を先に固定してから空き車両を絞り込む。車種ラインナップは02の空き車両一覧と同じ大きめのカードで表示し、フォームの下に車種ラインナップ→選ばれるポイント→フッターの順で補足情報を配置。トヨタ・タイムズと同じ「フォーム優先＋下にスクロールで補足情報」という構成に揃えた。</p>
       </div>
     </div>
 
