@@ -112,9 +112,9 @@
   .date-field { position: relative; }
   .date-display {
     display: flex; align-items: center;
-    width: 100%; padding: 11px 13px; border-radius: 10px;
+    width: 100%; padding: 11px 10px; border-radius: 10px;
     border: 1px solid var(--line); background: var(--surface-alt); color: var(--ink);
-    font-size: .88rem; font-variant-numeric: tabular-nums; white-space: nowrap;
+    font-size: .78rem; font-variant-numeric: tabular-nums; white-space: nowrap;
     pointer-events: none;
   }
   .date-native {
@@ -557,7 +557,7 @@
     if (!iso) return '未選択';
     var d = new Date(iso + 'T00:00:00');
     var wd = ['日','月','火','水','木','金','土'][d.getDay()];
-    return (d.getMonth()+1) + '/' + d.getDate() + '（' + wd + '）';
+    return d.getFullYear() + '/' + (d.getMonth()+1) + '/' + d.getDate() + '（' + wd + '）';
   }
   [['f-pickup-date','f-pickup-date-display'], ['f-return-date','f-return-date-display']].forEach(function (pair) {
     var input = document.getElementById(pair[0]);
