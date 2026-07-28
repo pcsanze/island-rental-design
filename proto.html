@@ -330,7 +330,7 @@
 
         <!-- 3. 予約フォーム -->
         <section id="cust-form" class="page" hidden>
-          <div class="app-top"><span class="mark">Island Rent-a-Car</span></div>
+          <div class="app-top"><span class="mark">Island Rent-a-Car</span><button class="btn btn-ghost btn-sm" id="btn-back-vehlist">車両選択に戻る</button></div>
           <h2 style="font-size:1.05rem;">予約者情報の入力</h2>
           <div class="summary-strip" id="form-summary"></div>
           <div><span class="field-label">お名前</span><input class="field" id="f-name" placeholder="石垣 太郎"></div>
@@ -618,6 +618,10 @@
     showPage('cust-top');
   });
 
+  document.getElementById('btn-back-vehlist').addEventListener('click', function () {
+    showPage('cust-list');
+  });
+
   function nights() {
     var pd = new Date(document.getElementById('f-pickup-date').value);
     var rd = new Date(document.getElementById('f-return-date').value);
@@ -736,10 +740,10 @@
 
   var dayGanttData = {
     busy: [
-      { name:'N-BOX',   cells:[['',1],['confirmed 石垣 太郎',2],['',1],['',1],['',1]] },
+      { name:'N-BOX',   cells:[['',1],['pending 石垣 太郎',2],['',1],['',1],['',1]] },
       { name:'フィット', cells:[['',1],['',1],['',1],['confirmed 鈴木 次郎',2],['',1]] },
       { name:'カローラ', cells:[['pending 仮',1],['',1],['confirmed 山田 花子',2],['',1],['',1]] },
-      { name:'CX-5',    cells:[['',1],['',1],['',1],['pending 仮',1],['confirmed 田中 一郎',2]] },
+      { name:'CX-5',    cells:[['',1],['',1],['',1],['pending 仮',1],['pending 田中 一郎',2]] },
       { name:'ハイエース', cells:[['blocked',1],['blocked',1],['confirmed 団体旅行 8名',3],['',1]] }
     ],
     quiet: [
