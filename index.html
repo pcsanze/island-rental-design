@@ -222,8 +222,25 @@
     color: var(--ink);
     font-size: .88rem;
   }
-  .field-row { display: flex; gap: 10px; }
-  .field-row > div { flex: 1; }
+  .field-row { display: flex; gap: 8px; }
+  .field-row > div { flex: 1; min-width: 0; }
+  .field-row .field-col-date { flex: 1.4; }
+  .field-row .field-col-time { flex: 1; }
+  .field-row select { min-width: 0; width: 100%; }
+
+  /* 日付：見た目は自前のテキスト表示、タップした時だけ裏でネイティブpickerが開く */
+  .date-field { position: relative; }
+  .date-display {
+    display: flex; align-items: center;
+    width: 100%; padding: 11px 10px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--surface-alt); color: var(--ink);
+    font-size: .78rem; font-variant-numeric: tabular-nums; white-space: nowrap;
+    pointer-events: none;
+  }
+  .date-native {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    margin: 0; padding: 0; border: none; opacity: 0;
+  }
 
   .btn {
     border-radius: 11px;
@@ -414,12 +431,24 @@
           </div>
 
           <div class="field-row">
-            <div><span class="field-label">貸出日</span><input class="field" type="date" value="2026-08-12"></div>
-            <div><span class="field-label">時間</span><select class="field"><option>10:00</option></select></div>
+            <div class="field-col-date">
+              <span class="field-label">貸出日</span>
+              <div class="date-field">
+                <span class="date-display" id="f-pickup-date-display"></span>
+                <input class="date-native" type="date" id="f-pickup-date" value="2026-08-12">
+              </div>
+            </div>
+            <div class="field-col-time"><span class="field-label">時間</span><select class="field"><option>10:00</option></select></div>
           </div>
           <div class="field-row">
-            <div><span class="field-label">返却日</span><input class="field" type="date" value="2026-08-14"></div>
-            <div><span class="field-label">時間</span><select class="field"><option>10:00</option></select></div>
+            <div class="field-col-date">
+              <span class="field-label">返却日</span>
+              <div class="date-field">
+                <span class="date-display" id="f-return-date-display"></span>
+                <input class="date-native" type="date" id="f-return-date" value="2026-08-14">
+              </div>
+            </div>
+            <div class="field-col-time"><span class="field-label">時間</span><select class="field"><option>10:00</option></select></div>
           </div>
 
           <div>
@@ -852,5 +881,21 @@
       var target = document.getElementById(targetId);
       if (target) target.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
     });
+  });
+
+  // 日付：ネイティブinputは非表示のまま機能させ、見た目は自前のテキストに反映する
+  function formatDateShort(iso) {
+    if (!iso) return '未選択';
+    var d = new Date(iso + 'T00:00:00');
+    var wd = ['日','月','火','水','木','金','土'][d.getDay()];
+    return d.getFullYear() + '/' + (d.getMonth()+1) + '/' + d.getDate() + '（' + wd + '）';
+  }
+  [['f-pickup-date','f-pickup-date-display'], ['f-return-date','f-return-date-display']].forEach(function (pair) {
+    var input = document.getElementById(pair[0]);
+    var display = document.getElementById(pair[1]);
+    function sync() { display.textContent = formatDateShort(input.value); }
+    sync();
+    input.addEventListener('change', sync);
+    input.addEventListener('input', sync);
   });
 </script>
